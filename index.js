@@ -1,10 +1,10 @@
-import bubbleSort from './bubbleSort'
+import bubbleSort from './algorithm/bubbleSort'
 import getGenerateArray, {setDefaultArray, judgeTheString} from './lib/generateArray'
 import {showInDom} from './lib/renderData'
-import selectionSort from './selectionSort'
-import insertionSort from './insertionSort'
-import shellSort from './shellSort'
-import {mergeSortIterate, mergeSortRecursive} from './mergeSort'
+import selectionSort from './algorithm/selectionSort'
+import insertionSort from './algorithm/insertionSort'
+import shellSort from './algorithm/shellSort'
+import {mergeSortIterate, mergeSortRecursive} from './algorithm/mergeSort'
 
 setDefaultArray('1,45,23,76,34,98,567,12,34,22,21,45')
 
