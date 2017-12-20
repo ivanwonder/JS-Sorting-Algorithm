@@ -6,6 +6,7 @@ import insertionSort from './algorithm/insertionSort'
 import shellSort from './algorithm/shellSort'
 import {mergeSortIterate, mergeSortRecursive} from './algorithm/mergeSort'
 import heapSort from './algorithm/heapSort'
+import radixSort from './algorithm/radixSort'
 
 setDefaultArray('1,45,23,76,34,98,567,12,34,22,21,45')
 
@@ -20,6 +21,7 @@ function show () {
     .show('mergeSortIterate', mergeSortIterate(getGenerateArray()))
     .show('mergeSortRecursive', mergeSortRecursive(getGenerateArray()))
     .show('heapSort', heapSort(getGenerateArray()))
+    .show('radixSort', radixSort(getGenerateArray()))
 }
 
 show()
