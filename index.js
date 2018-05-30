@@ -8,6 +8,8 @@ import {mergeSortIterate, mergeSortRecursive} from './algorithm/mergeSort'
 import heapSort from './algorithm/heapSort'
 import radixSort from './algorithm/radixSort'
 
+import {BST} from './algorithm/BST';
+
 setDefaultArray('1,45,23,76,34,98,567,12,34,22,21,45')
 
 function show () {
@@ -28,3 +30,7 @@ show()
 document.getElementById('begin-sort').onclick = function () {
   show()
 }
+
+var test = new BST();
+test.buildRandomTree();
+console.log(test.head);

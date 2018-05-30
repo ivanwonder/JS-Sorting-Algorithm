@@ -4,5 +4,8 @@ module.exports = {
         "browser": true,
         "node": true,
         "mocha": true
+    },
+    "rules": {
+        "semi": 0
     }
 };
