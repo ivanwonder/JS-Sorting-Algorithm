@@ -8,7 +8,8 @@ import {mergeSortIterate, mergeSortRecursive} from './algorithm/mergeSort'
 import heapSort from './algorithm/heapSort'
 import radixSort from './algorithm/radixSort'
 
-import {BST, buildTreeCanvas} from './algorithm/BST';
+import {BST} from './algorithm/BST';
+import {buildTreeCanvas} from './lib/buildTreeCanvas';
 
 setDefaultArray('1,45,23,76,34,98,567,12,34,22,21,45')
 
@@ -32,7 +33,7 @@ document.getElementById('begin-sort').onclick = function () {
 }
 
 var test = new BST();
-test.buildRandomTree(15);
+test.buildRandomTree(10);
 console.log(test.head);
 const canvas = buildTreeCanvas(test.head);
 document.getElementById('test').appendChild(canvas);
