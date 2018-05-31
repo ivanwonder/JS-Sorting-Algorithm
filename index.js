@@ -32,7 +32,7 @@ document.getElementById('begin-sort').onclick = function () {
 }
 
 var test = new BST();
-test.buildRandomTree(20);
+test.buildRandomTree(15);
 console.log(test.head);
 const canvas = buildTreeCanvas(test.head);
 document.getElementById('test').appendChild(canvas);

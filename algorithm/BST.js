@@ -118,21 +118,42 @@ function buildNodeFlag (node) {
 }
 
 const radius = 10;
-const gap = 50;
-const treeGap = 2;
-const nodeHeight = 50;
+const nodeGap = 50;
+const leftOffset = 2;
+const nodeHeightWithParent = 50;
+const nodeGapWithDifferentParent = 2;
+
+function getXByFlag (left, right) {
+  const offsetWithSameLevel = right - left;
+  return (Math.floor(offsetWithSameLevel / 2)) * (nodeGapWithDifferentParent + nodeGap) + offsetWithSameLevel % 2 * nodeGap + leftOffset + offsetWithSameLevel * radius * 2 + radius;
+}
+
+function calculateXPoint (node, height) {
+  const currentHeight = getHeightByFlag(node.flag);
+  const leftPointFlag = Math.pow(2, height) - 1;
+  const _offset = height - currentHeight;
+  const currentLeftPointFlag = node.flag * Math.pow(2, _offset) + Math.pow(2, _offset) - 1;
+  const currentRightPointFlag = node.flag * Math.pow(2, _offset) + Math.pow(2, _offset) * 2 - 2;
+  const currentLeftPointX = getXByFlag(leftPointFlag, currentLeftPointFlag);
+  const currentRightPointX = getXByFlag(leftPointFlag, currentRightPointFlag);
+  return (currentLeftPointX + currentRightPointX) / 2;
+}
 
 function drawCircle (canvas, node, height) {
   if (canvas.getContext) {
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
-
-    const _height = getHeightByFlag(node.flag);
-    const offset = node.flag - Math.pow(2, _height) + 1;
-    const x = treeGap + (offset / 2) * (treeGap + gap) + (offset % 2) * gap + offset * 2 * radius + radius + (height - _height) * (gap / 2 + radius);
-    const y = _height * nodeHeight + radius;
+    const currentHeight = getHeightByFlag(node.flag);
+    let x, y;
+    x = calculateXPoint(node, height);
+    y = currentHeight * nodeHeightWithParent + radius;
     ctx.arc(x, y, radius, 0, Math.PI * 2, true);
     ctx.stroke();
+
+    ctx.font = '12px';
+    ctx.strokeText(node.flag, x, y);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
   }
 }
 
@@ -148,8 +169,8 @@ function buildTreeCanvas (node = new Node()) {
   const height = getHeightByFlag(maxFlag);
 
   const canvasDOM = document.createElement('canvas');
-  canvasDOM.width = 500;
-  canvasDOM.height = 500;
+  canvasDOM.width = 1500;
+  canvasDOM.height = 1500;
 
   const _stack = new Stack();
   _stack.push(head);
@@ -164,6 +185,7 @@ function buildTreeCanvas (node = new Node()) {
     }
   }
   console.log(head);
+  console.log(height);
 
   return canvasDOM;
 }
