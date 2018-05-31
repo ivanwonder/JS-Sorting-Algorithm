@@ -121,8 +121,7 @@ class BST {
 
   buildRandomTree (runTimes = 10) {
     while (runTimes--) {
-      const key = this.getRandom(runTimes);
-      console.log(key);
+      const key = this.getRandom(runTimes * 10);
       this.put(key, key);
     }
   }
