@@ -35,5 +35,15 @@ document.getElementById('begin-sort').onclick = function () {
 var test = new BST();
 test.buildRandomTree(10);
 console.log(test.head);
-const canvas = buildTreeCanvas(test.head);
-document.getElementById('test').appendChild(canvas);
+let canvas = buildTreeCanvas(test.head);
+const canvasContainer = document.getElementById('test');
+canvasContainer.appendChild(canvas);
+
+document.getElementById('deleteMin').onclick = function () {
+  // canvasContainer.removeChild(canvas);
+  test.deleteMin();
+  if (test.head) {
+    canvas = buildTreeCanvas(test.head);
+    canvasContainer.appendChild(canvas);
+  }
+}

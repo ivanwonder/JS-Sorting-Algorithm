@@ -119,6 +119,45 @@ class BST {
     node.right.isRed = !node.right.isRed;
   }
 
+  deleteMin (node = this.head) {
+    if (!node) {
+      return null;
+    }
+
+    if (!node.left) {
+      this.head = null;
+      return null;
+    }
+
+    const _stack = new Stack();
+    while (node.left) {
+      if (!node.left.isRed && (!node.left.left || !node.left.left.isRed)) {
+        this.flipColor(node);
+        if (node.right.left && node.right.left.isRed) {
+          node.right = this.rotateRight(node.right);
+        }
+        node = this.rotateLeft(node);
+        if (node.right && node.right.isRed) {
+          this.flipColor(node);
+        }
+      }
+
+      _stack.push(node);
+      if (!node.left.left) {
+        node.left = null;
+        break;
+      }
+      node = node.left;
+    }
+    let _preNode = _stack.pop();
+    while (_stack.size()) {
+      const _currentNode = _stack.pop();
+      _currentNode.left = _preNode;
+      _preNode = this.balance(_currentNode);
+    }
+    this.head = _preNode;
+  }
+
   buildRandomTree (runTimes = 10) {
     while (runTimes--) {
       const key = this.getRandom(runTimes * 10);
