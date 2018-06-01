@@ -130,6 +130,7 @@ class BST {
     }
 
     const _stack = new Stack();
+    let nodeRemoved;
     while (node.left) {
       if (!node.left.isRed && (!node.left.left || !node.left.left.isRed)) {
         this.flipColor(node);
@@ -143,7 +144,9 @@ class BST {
       }
 
       _stack.push(node);
+      // delete the minimal node
       if (!node.left.left) {
+        nodeRemoved = node.left;
         node.left = null;
         break;
       }
@@ -156,6 +159,102 @@ class BST {
       _preNode = this.balance(_currentNode);
     }
     this.head = _preNode;
+    return nodeRemoved;
+  }
+
+  isRed (node) {
+    if (!node) {
+      return false;
+    }
+    return node.isRed;
+  }
+
+  needLeftRotate (node) {
+    if (node.left && !node.left.isRed && (!node.left.left || !node.left.left.isRed)) {
+      return true;
+    }
+    return false;
+  }
+
+  needRightRotate (node) {
+    if (node.right && !node.right.isRed && (!node.right.left || !node.right.left.isRed)) {
+      return true;
+    }
+    return false;
+  }
+
+  moveRedLeft (node) {
+    this.flipColor(node);
+    if (node.right.left && node.right.left.isRed) {
+      node.right = this.rotateRight(node.right);
+    }
+    node = this.rotateLeft(node);
+    if (node.right && node.right.isRed) {
+      this.flipColor(node);
+    }
+    return node;
+  }
+
+  moveRedRight (node) {
+    this.flipColor(node);
+    node = this.rotateRight(node);
+    if (node.left && node.left.isRed) {
+      this.flipColor(node);
+    }
+    return node;
+  }
+
+  delete (node, key) {
+    if (!node) {
+      return null;
+    }
+    const _stack = new Stack();
+    while (node) {
+      let nextNode;
+      if (node.key > key) {
+        if (this.needLeftRotate(node)) {
+          node = this.moveRedLeft(node);
+        }
+      } else {
+        if (node.left && node.left.isRed) {
+          node = this.rotateRight(node);
+        }
+        if (this.needRightRotate(node)) {
+          node = this.moveRedRight(node);
+        }
+        if (node.key === key) {
+          let minNode = this.deleteMin(node.right);
+          if (minNode === node.right || !minNode) {
+            node.right = null;
+          } else {
+            minNode.left = node.left;
+            minNode.right = node.right;
+          }
+          break;
+        }
+      }
+      nextNode = node.right;
+      _stack.push(node);
+      node = nextNode;
+    }
+
+    if (!node) {
+      return null;
+    } else {
+      node = this.balance(node);
+      while (_stack.size()) {
+        let _currentNode = _stack.pop();
+        if (_currentNode.key > node.key) {
+          _currentNode.left = node;
+        } else {
+          _currentNode.right = node;
+        }
+        node = this.balance(_currentNode);
+      }
+    }
+
+    this.head = node;
+    return node;
   }
 
   buildRandomTree (runTimes = 10) {
