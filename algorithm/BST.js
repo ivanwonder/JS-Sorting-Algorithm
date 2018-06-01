@@ -130,7 +130,6 @@ class BST {
     }
 
     const _stack = new Stack();
-    let nodeRemoved;
     while (node.left) {
       if (!node.left.isRed && (!node.left.left || !node.left.left.isRed)) {
         this.flipColor(node);
@@ -146,7 +145,6 @@ class BST {
       _stack.push(node);
       // delete the minimal node
       if (!node.left.left) {
-        nodeRemoved = node.left;
         node.left = null;
         break;
       }
@@ -159,7 +157,7 @@ class BST {
       _preNode = this.balance(_currentNode);
     }
     this.head = _preNode;
-    return nodeRemoved;
+    return this.head;
   }
 
   isRed (node) {
@@ -197,24 +195,40 @@ class BST {
 
   moveRedRight (node) {
     this.flipColor(node);
-    node = this.rotateRight(node);
-    if (node.left && node.left.isRed) {
+    // node = this.rotateRight(node);
+    if (this.isRed(node.left.left)) {
+      node = this.rotateRight(node);
       this.flipColor(node);
+    }
+    // if (node.left && node.left.isRed) {
+    //   this.flipColor(node);
+    // }
+    return node;
+  }
+
+  min (node) {
+    if (!node) {
+      return null;
+    }
+    while (node.left) {
+      node = node.left;
     }
     return node;
   }
 
   delete (node, key) {
-    if (!node) {
+    if (!node || !key) {
       return null;
     }
     const _stack = new Stack();
+    let findNode = false;
     while (node) {
       let nextNode;
       if (node.key > key) {
         if (this.needLeftRotate(node)) {
           node = this.moveRedLeft(node);
         }
+        nextNode = node.left;
       } else {
         if (node.left && node.left.isRed) {
           node = this.rotateRight(node);
@@ -223,34 +237,46 @@ class BST {
           node = this.moveRedRight(node);
         }
         if (node.key === key) {
-          let minNode = this.deleteMin(node.right);
-          if (minNode === node.right || !minNode) {
-            node.right = null;
+          findNode = true;
+          let minNode = this.min(node.right);
+          let _root = this.deleteMin(node.right);
+          if (!minNode) {
+            node = null;
+          } else if (!_root) {
+            minNode.isRed = node.isRed;
+            node = minNode;
           } else {
             minNode.left = node.left;
-            minNode.right = node.right;
+            minNode.right = _root;
+            minNode.isRed = node.isRed;
+            node = minNode;
           }
           break;
         }
+        nextNode = node.right;
       }
-      nextNode = node.right;
       _stack.push(node);
       node = nextNode;
     }
 
-    if (!node) {
-      return null;
-    } else {
-      node = this.balance(node);
-      while (_stack.size()) {
-        let _currentNode = _stack.pop();
-        if (_currentNode.key > node.key) {
-          _currentNode.left = node;
-        } else {
-          _currentNode.right = node;
-        }
-        node = this.balance(_currentNode);
+    if (findNode && _stack.size()) {
+      let currentNode = _stack.pop();
+      currentNode.right = node;
+      node = this.balance(currentNode);
+    }
+
+    if (!findNode) {
+      node = _stack.pop();
+    }
+
+    while (_stack.size()) {
+      let _currentNode = _stack.pop();
+      if (_currentNode.key > node.key) {
+        _currentNode.left = node;
+      } else {
+        _currentNode.right = node;
       }
+      node = this.balance(_currentNode);
     }
 
     this.head = node;

@@ -47,3 +47,12 @@ document.getElementById('deleteMin').onclick = function () {
     canvasContainer.appendChild(canvas);
   }
 }
+
+document.getElementById('delete-button').onclick = function () {
+  const value = document.getElementById('delete-value').value;
+  const node = test.delete(test.head, Number(value));
+  if (node) {
+    canvas = buildTreeCanvas(test.head);
+    canvasContainer.appendChild(canvas);
+  }
+};
