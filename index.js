@@ -50,9 +50,17 @@ document.getElementById('deleteMin').onclick = function () {
   }
 }
 
+document.getElementById('deleteMax').onclick = function () {
+  test.deleteMax();
+  if (test.head) {
+    canvas = buildTreeCanvas(test.head);
+    canvasContainer.appendChild(canvas);
+  }
+};
+
 document.getElementById('delete-button').onclick = function () {
   const value = document.getElementById('delete-value').value;
-  const node = test.delete(test.head, Number(value));
+  const node = test.delete(Number(value));
   if (node) {
     canvas = buildTreeCanvas(test.head);
     canvasContainer.appendChild(canvas);

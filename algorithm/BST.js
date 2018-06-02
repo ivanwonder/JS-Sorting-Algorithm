@@ -131,15 +131,8 @@ class BST {
 
     const _stack = new Stack();
     while (node.left) {
-      if (!node.left.isRed && (!node.left.left || !node.left.left.isRed)) {
-        this.flipColor(node);
-        if (node.right.left && node.right.left.isRed) {
-          node.right = this.rotateRight(node.right);
-        }
-        node = this.rotateLeft(node);
-        if (node.right && node.right.isRed) {
-          this.flipColor(node);
-        }
+      if (this.needLeftRotate(node)) {
+        node = this.moveRedLeft(node);
       }
 
       _stack.push(node);
@@ -150,7 +143,7 @@ class BST {
       }
       node = node.left;
     }
-    let _preNode = _stack.pop();
+    let _preNode = this.balance(_stack.pop());
     while (_stack.size()) {
       const _currentNode = _stack.pop();
       _currentNode.left = _preNode;
@@ -158,6 +151,61 @@ class BST {
     }
     this.head = _preNode;
     return this.head;
+  }
+
+  deleteMax (node = this.head) {
+    if (!node) {
+      return null;
+    }
+
+    if (!node.left) {
+      this.head = null;
+      return null;
+    }
+
+    const _stack = new Stack();
+    while (node) {
+      if (this.isRed(node.left)) {
+        node = this.rotateRight(node);
+      }
+      if (this.needRightRotate(node)) {
+        node = this.moveRedRight(node);
+      }
+
+      _stack.push(node);
+      // delete the minimal node
+      if (!node.right.right && !node.right.left) {
+        node.right = null;
+        break;
+      }
+      node = node.right;
+    }
+    let _preNode = this.balance(_stack.pop());
+    while (_stack.size()) {
+      const _currentNode = _stack.pop();
+      _currentNode.right = _preNode;
+      _preNode = this.balance(_currentNode);
+    }
+    this.head = _preNode;
+    return this.head;
+  }
+
+  get (key) {
+    let node = this.head;
+    while (node) {
+      if (node.key === key) {
+        return node.value;
+      }
+      if (node.key > key) {
+        node = node.left;
+        continue;
+      }
+      if (node.key < key) {
+        node = node.right;
+        continue;
+      }
+    }
+    return null;
   }
 
   isRed (node) {
@@ -232,12 +280,16 @@ class BST {
     return node;
   }
 
-  delete (node, key) {
+  delete (key) {
+    let node = this.head;
     if (!node || (typeof key === 'undefined')) {
       return null;
     }
+    if (this.get(key) === null) {
+      return null;
+    }
+
     const _stack = new Stack();
-    let findNode = false;
     while (node) {
       let nextNode;
       if (node.key > key) {
@@ -253,11 +305,21 @@ class BST {
           node = this.moveRedRight(node);
         }
         if (node.key === key) {
-          findNode = true;
           let minNode = this.min(node.right);
           let _root = this.deleteMin(node.right);
           if (!minNode) {
-            node = null;
+            if (_stack.size()) {
+              let _currentNode = _stack.pop();
+              if (_currentNode.key > node.key) {
+                _currentNode.left = null;
+              } else {
+                _currentNode.right = null;
+              }
+              node = _currentNode;
+            } else {
+              // only one node to be deleted.
+              return (this.head = null);
+            }
           } else {
             minNode.left = node.left;
             minNode.right = _root;
@@ -270,16 +332,6 @@ class BST {
       }
       _stack.push(node);
       node = nextNode;
-    }
-
-    if (findNode && _stack.size()) {
-      let currentNode = _stack.pop();
-      currentNode.right = node;
-      node = this.balance(currentNode);
-    }
-
-    if (!findNode) {
-      node = _stack.pop();
     }
 
     node = this.balance(node);
