@@ -10,6 +10,7 @@ import radixSort from './algorithm/radixSort'
 
 import {BST} from './algorithm/BST';
 import {buildTreeCanvas} from './lib/buildTreeCanvas';
+import {isRBTree} from './lib/testBST';
 
 setDefaultArray('1,45,23,76,34,98,567,12,34,22,21,45')
 
@@ -38,6 +39,7 @@ console.log(test.head);
 let canvas = buildTreeCanvas(test.head);
 const canvasContainer = document.getElementById('test');
 canvasContainer.appendChild(canvas);
+console.log(isRBTree(test.head));
 
 document.getElementById('deleteMin').onclick = function () {
   // canvasContainer.removeChild(canvas);

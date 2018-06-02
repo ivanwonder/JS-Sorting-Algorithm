@@ -233,7 +233,7 @@ class BST {
   }
 
   delete (node, key) {
-    if (!node || !key) {
+    if (!node || (typeof key === 'undefined')) {
       return null;
     }
     const _stack = new Stack();
