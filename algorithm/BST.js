@@ -183,26 +183,42 @@ class BST {
 
   moveRedLeft (node) {
     this.flipColor(node);
-    if (node.right.left && node.right.left.isRed) {
+    if (this.isRed(node.right.left)) {
       node.right = this.rotateRight(node.right);
-    }
-    node = this.rotateLeft(node);
-    if (node.right && node.right.isRed) {
+      node = this.rotateLeft(node);
       this.flipColor(node);
     }
     return node;
   }
 
+  //       RN
+  //    B        B
+  //  B    B  B      B
+  // in this case, just flip the color, like the blow. the balance will make it right.
+  //       RN
+  //    R        R
+  //  B    B  B      B
+  // if translate into this as f0llow.
+  //   R
+  // B    Rn
+  //    B       R
+  //         B      B
+  // it will make the balance wrong.
+
+  //       RN
+  //    B        B
+  //  R    B  B      B
+  // as above, it will be translated into blow
+  //                   B->RN
+  //       R->B               RN->B
+  //  NULL      NULL       B         B->R
+  //                   NULL  NULL  B      B
   moveRedRight (node) {
     this.flipColor(node);
-    // node = this.rotateRight(node);
     if (this.isRed(node.left.left)) {
       node = this.rotateRight(node);
       this.flipColor(node);
     }
-    // if (node.left && node.left.isRed) {
-    //   this.flipColor(node);
-    // }
     return node;
   }
 
@@ -242,9 +258,6 @@ class BST {
           let _root = this.deleteMin(node.right);
           if (!minNode) {
             node = null;
-          } else if (!_root) {
-            minNode.isRed = node.isRed;
-            node = minNode;
           } else {
             minNode.left = node.left;
             minNode.right = _root;
@@ -268,6 +281,8 @@ class BST {
     if (!findNode) {
       node = _stack.pop();
     }
+
+    node = this.balance(node);
 
     while (_stack.size()) {
       let _currentNode = _stack.pop();
