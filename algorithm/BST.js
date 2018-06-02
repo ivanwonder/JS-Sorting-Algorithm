@@ -173,7 +173,7 @@ class BST {
       }
 
       _stack.push(node);
-      // delete the minimal node
+      // delete only when the right node have not child node.
       if (!node.right.right && !node.right.left) {
         node.right = null;
         break;
@@ -285,6 +285,7 @@ class BST {
     if (!node || (typeof key === 'undefined')) {
       return null;
     }
+
     if (this.get(key) === null) {
       return null;
     }
@@ -308,6 +309,7 @@ class BST {
           let minNode = this.min(node.right);
           let _root = this.deleteMin(node.right);
           if (!minNode) {
+            // handle the condition when the node will be deleted is the leaf node;
             if (_stack.size()) {
               let _currentNode = _stack.pop();
               if (_currentNode.key > node.key) {
