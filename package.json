@@ -30,5 +30,7 @@
     "webpack-dev-server": "^2.9.4",
     "webpack-merge": "^4.1.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "string-hash": "^1.1.3"
+  }
 }
