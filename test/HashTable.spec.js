@@ -32,8 +32,8 @@ describe("test hash table", function() {
     }
     assert.equal(_map.get("ivan1"), null);
     assert.equal(_map.length, mapSize - deleteNum);
-    assert.equal(_map._table.length, 320);
+    assert.equal(_map._table.keys.length, 320);
     _map.delete(`ivan${deleteNum + 1}`);
-    assert.equal(_map._table.length, 160);
+    assert.equal(_map._table.keys.length, 160);
   });
 });

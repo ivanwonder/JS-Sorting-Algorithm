@@ -1,9 +1,18 @@
 import stringHash from "string-hash";
 
+class LinearProbingHashST {
+  constructor(size) {
+    this.size = size;
+    this.keys = new Array(size);
+    this.values = new Array(size);
+  }
+}
+
 class HashTable {
   constructor() {
     this.initLength = 10;
-    this._table = new Array(this.initLength);
+    // this._table = new Array(this.initLength);
+    this._table = new LinearProbingHashST(this.initLength);
     this.length = 0;
   }
 
@@ -12,10 +21,11 @@ class HashTable {
 
     this.initLength = size;
     const _table = this._table;
-    this._table = new Array(this.initLength);
-    _table.forEach(value => {
+    // this._table = new Array(this.initLength);
+    this._table = new LinearProbingHashST(this.initLength);
+    _table.keys.forEach((value, index) => {
       if (typeof value !== "undefined") {
-        this.set(value[0], value[1]);
+        this.set(value, _table.values[index]);
       }
     });
 
@@ -32,27 +42,28 @@ class HashTable {
       this.resize(this.initLength * 2);
     }
     let keyIndex = this.hashIndex(key);
-    let _val = this._table[keyIndex];
-    while (_val !== undefined) {
-      if (_val[0] === key) {
-        _val[1] = value;
+    let _key = this._table.keys[keyIndex];
+    while (_key !== undefined) {
+      if (_key === key) {
+        this._table.values[keyIndex] = value;
         // this.length++;
         return;
       }
-      _val = this._table[++keyIndex % this.initLength];
+      _key = this._table.keys[++keyIndex % this.initLength];
     }
     this.length++;
-    this._table[keyIndex] = [key, value];
+    this._table.keys[keyIndex] = key;
+    this._table.values[keyIndex] = value;
   }
 
   get(key) {
     let keyIndex = this.hashIndex(key);
-    let _val = this._table[keyIndex];
-    while (_val !== undefined) {
-      if (_val[0] === key) {
-        return _val[1];
+    let _key = this._table.keys[keyIndex];
+    while (_key !== undefined) {
+      if (_key === key) {
+        return this._table.values[keyIndex];
       }
-      _val = this._table[++keyIndex % this.initLength];
+      _key = this._table.keys[++keyIndex % this.initLength];
     }
     return null;
   }
@@ -61,23 +72,23 @@ class HashTable {
     let valueDeleted = null;
 
     let keyIndex = this.hashIndex(key);
-    let _val = this._table[keyIndex];
-    while (_val !== undefined) {
-      if (_val[0] === key) {
-        valueDeleted = _val[1];
-        this._table[keyIndex] = undefined;
+    let _key = this._table.keys[keyIndex];
+    while (_key !== undefined) {
+      if (_key === key) {
+        valueDeleted = this._table.values[keyIndex];
+        this._table.keys[keyIndex] = undefined;
         break;
       }
-      _val = this._table[++keyIndex % this.initLength];
+      _key = this._table.keys[++keyIndex % this.initLength];
     }
 
     if (valueDeleted !== null) {
-      _val = this._table[++keyIndex];
-      while (_val !== undefined) {
-        this._table[keyIndex] = undefined;
+      _key = this._table.keys[++keyIndex];
+      while (_key !== undefined) {
+        this._table.keys[keyIndex] = undefined;
         --this.length; // must perform before set in case of table resize.
-        this.set(_val[0], _val[1]);
-        _val = this._table[++keyIndex % this.initLength];
+        this.set(_key, this._table.values[keyIndex]);
+        _key = this._table.keys[++keyIndex % this.initLength];
       }
       --this.length;
     }
