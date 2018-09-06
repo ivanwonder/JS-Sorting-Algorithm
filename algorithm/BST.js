@@ -109,7 +109,7 @@ class BST {
       this.flipColor(currentNode);
     }
 
-    // make sure the size of the node which no need to be ratate is correct;
+    // make sure the size of the node which no need to be rotate is correct;
     currentNode.size = this.size(currentNode.left) + this.size(currentNode.right) + 1;
     return currentNode;
   }
