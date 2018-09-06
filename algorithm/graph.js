@@ -116,6 +116,11 @@ class CC {
     }
   }
 
+  /**
+   * @description
+   * @param {Graph} graph
+   * @param {number} vertex
+   */
   dfs(graph, vertex) {
     invariant(isNumber(vertex), "graph's vertex should be a number");
     this._marked[vertex] = true;
@@ -140,6 +145,9 @@ class CC {
     return this._count;
   }
 
+  /**
+   * @param {number} vertex
+   */
   id(vertex) {
     return this._id[vertex];
   }

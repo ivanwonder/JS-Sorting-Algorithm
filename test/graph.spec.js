@@ -57,5 +57,7 @@ describe('graph', function () {
     }
 
     assert.deepEqual(componentString, ["0 1 2 3 4 5 6", "7 8", "9 10 11 12"]);
+    assert.equal(cc.connected(7, 8), true, "the two components should be equal");
+    assert.equal(cc.count(), 3, "the graph should have 3 connected components");
   })
 })

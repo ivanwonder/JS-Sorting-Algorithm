@@ -19,6 +19,11 @@ class BST {
     return Math.floor(Math.random() * range)
   }
 
+  /**
+   * @description add new key and value
+   * @param  {...any} arg the key and value
+   * @returns {Node} the new node or the modify node
+   */
   put (...arg) {
     let key = null
     let value = null
