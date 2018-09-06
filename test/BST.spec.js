@@ -89,4 +89,17 @@ describe('BST', function () {
     tree.delete(5);
     assert.equal(tree.head, null, 'the tree must be null');
   });
+
+  it('test keys', function () {
+    const tree = new BST();
+    treeFour.forEach(function (value) {
+      tree.put(value, value);
+    });
+    const queue = tree.keys();
+    const actual = [];
+    while (queue.size()) {
+      actual.push(queue.dequeue());
+    }
+    assert.deepEqual(actual.join(' '), '1 2 3 4 5');
+  })
 })

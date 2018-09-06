@@ -1,4 +1,5 @@
-import {Stack} from '../lib/stack';
+import {Stack, Queue} from '../lib/stack';
+import { invariant, isNull } from '../lib/unit';
 
 class Node {
   constructor (key, value, isRed) {
@@ -40,6 +41,7 @@ class BST {
     if (arg.length === 2) {
       [key, value] = arg;
     }
+    invariant(!isNull(value), "the BST node value can not be null");
     if (!this.head) {
       this.head = new Node(key, value, false);
       return this.head;
@@ -254,6 +256,10 @@ class BST {
     return null;
   }
 
+  contains(key) {
+    return !isNull(this.get(key));
+  }
+
   isRed (node) {
     if (!node) {
       return false;
@@ -316,12 +322,36 @@ class BST {
     return node;
   }
 
+  /**
+   * @param {Node} node
+   * @returns {Node}
+   */
   min (node) {
+    if (arguments.length === 0) {
+      return this.min(this.head);
+    }
     if (!node) {
       return null;
     }
     while (node.left) {
       node = node.left;
+    }
+    return node;
+  }
+
+  /**
+   * @param {Node} node
+   * @returns {Node}
+   */
+  max (node) {
+    if (arguments.length === 0) {
+      return this.max(this.head);
+    }
+    if (!node) {
+      return null;
+    }
+    while (node.right) {
+      node = node.right;
     }
     return node;
   }
@@ -396,6 +426,48 @@ class BST {
 
     this.head = node;
     return node;
+  }
+
+  between(start, end) {
+    return function(value) {
+      return value >= start && value <= end;
+    }
+  }
+
+  keys(begin, end) {
+    if (!this.head) {
+      return null;
+    }
+
+    if (arguments.length === 0) {
+      return this.keys(this.min().key, this.max().key);
+    }
+
+    const stack = new Stack();
+    const queue = new Queue();
+
+    let currentNode = this.head;
+    const isBetween = this.between(begin, end);
+    while (true) {
+      if (currentNode && isBetween(currentNode.key)) {
+        stack.push(currentNode);
+        currentNode = currentNode.left;
+        continue;
+      } else {
+        if (stack.size() === 0) {
+          break;
+        } else {
+          /**
+           * @type {Node}
+           */
+          const _popNode = stack.pop();
+          currentNode = _popNode.right;
+          queue.enqueue(_popNode.key);
+        }
+      }
+    }
+
+    return queue;
   }
 
   buildRandomTree (runTimes = 10) {

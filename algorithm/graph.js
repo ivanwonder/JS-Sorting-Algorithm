@@ -1,5 +1,6 @@
 import {Stack} from '../lib/stack';
 import { isNumber, invariant } from '../lib/unit';
+import { BST } from './BST';
 
 class Graph {
   constructor(vertices) {
@@ -153,4 +154,27 @@ class CC {
   }
 }
 
-export {Graph, DepthFirstSearch, DepthFirstPaths, CC}
+class SymbolGraph {
+  /**
+   *
+   * @param {Array<[string, string]>} stream
+   */
+  constructor(stream) {
+    const bst = new BST();
+    stream.forEach(item => {
+      item.forEach(value => {
+        if (!bst.contains(value)) {
+          bst.put(value, bst.size());
+        }
+      });
+    });
+
+    this.graph = new Graph(bst.size());
+
+    stream.forEach(item => {
+      this.graph.addEdge(bst.get(item[0]), bst.get(item[1]));
+    });
+  }
+}
+
+export {Graph, DepthFirstSearch, DepthFirstPaths, CC, SymbolGraph}
