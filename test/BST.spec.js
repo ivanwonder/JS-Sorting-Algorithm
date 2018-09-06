@@ -38,15 +38,13 @@ describe('BST', function () {
   it('test random BST', function () {
     let times = 10;
     const bst = new BST();
-    const nodeSet = new Set();
     while (times--) {
       const key = bst.getRandom(times * 10);
-      nodeSet.add(key);
       bst.put(key, key);
     }
     const node = bst.head;
 
-    assert.deepEqual(nodeSet.size, getTreeNodeNumber(node));
+    assert.deepEqual(bst.size(), getTreeNodeNumber(node));
     testRBTree(bst.head);
   })
 
@@ -55,7 +53,7 @@ describe('BST', function () {
     treeOne.forEach((value) => {
       tree.put(value, value);
     });
-    assert.equal(getTreeNodeNumber(tree.head), 1, 'the node number of tree must be one');
+    assert.equal(getTreeNodeNumber(tree.head), tree.size(), 'the node number of tree must be one');
     tree.delete(treeOne[0]);
     assert.equal(tree.head, null, 'the tree must be null');
   });
@@ -85,7 +83,7 @@ describe('BST', function () {
     testRBTree(tree.head);
     tree.delete(2);
     testRBTree(tree.head);
-    assert.equal(getTreeNodeNumber(tree.head), 3, 'the node number of tree must be 3');
+    assert.equal(getTreeNodeNumber(tree.head), tree.size(), 'the node number of tree must be 3');
     tree.delete(1);
     tree.delete(4);
     tree.delete(5);

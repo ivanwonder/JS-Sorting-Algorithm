@@ -2,16 +2,26 @@ import {Stack} from '../lib/stack';
 
 class Node {
   constructor (key, value, isRed) {
+    /**
+     * @type {Node|null}
+     */
     this.left = null
+    /**
+     * @type {Node|null}
+     */
     this.right = null
     this.value = value || 0
     this.key = key || 0
     this.isRed = isRed;
+    this.size = 1; // size of the current tree's node
   }
 }
 
 class BST {
   constructor () {
+    /**
+     * @type {Node|null}
+     */
     this.head = null
   }
 
@@ -85,19 +95,28 @@ class BST {
     }
   }
 
+  /**
+   * @param {Node} currentNode
+   */
   balance (currentNode) {
-    if (currentNode.right && currentNode.right.isRed) {
+    if (this.isRed(currentNode.right) && !this.isRed(currentNode.left)) {
       currentNode = this.rotateLeft(currentNode);
     }
-    if (currentNode.left && currentNode.left.left && currentNode.left.isRed && currentNode.left.left.isRed) {
+    if (this.isRed(currentNode.left) && this.isRed(currentNode.left.left)) {
       currentNode = this.rotateRight(currentNode);
     }
-    if (currentNode.left && currentNode.right && currentNode.left.isRed && currentNode.right.isRed) {
+    if (this.isRed(currentNode.left) && this.isRed(currentNode.right)) {
       this.flipColor(currentNode);
     }
+
+    // make sure the size of the node which no need to be ratate is correct;
+    currentNode.size = this.size(currentNode.left) + this.size(currentNode.right) + 1;
     return currentNode;
   }
 
+  /**
+   * @param {Node} node
+   */
   rotateLeft (node) {
     const root = node.right;
     node.right = root.left;
@@ -105,9 +124,15 @@ class BST {
     const rootColor = root.isRed;
     root.isRed = node.isRed;
     node.isRed = rootColor;
+
+    root.size = node.size;
+    node.size = this.size(node.left) + this.size(node.right) + 1;
     return root;
   }
 
+  /**
+   * @param {Node} node
+   */
   rotateRight (node) {
     const root = node.left;
     node.left = root.right;
@@ -115,6 +140,9 @@ class BST {
     const rootColor = root.isRed;
     root.isRed = node.isRed;
     node.isRed = rootColor;
+
+    root.size = node.size;
+    node.size = this.size(node.left) + this.size(node.right) + 1;
     return root;
   }
 
@@ -122,6 +150,19 @@ class BST {
     node.isRed = !node.isRed;
     node.left.isRed = !node.left.isRed;
     node.right.isRed = !node.right.isRed;
+  }
+
+  /**
+   * @description get the node size, when no argument is passed to the function, it will return the tree size;
+   * @param {Node} node
+   * @returns {number}
+   */
+  size(node) {
+    if (arguments.length === 0) {
+      return this.head.size;
+    }
+    if (!node) return 0;
+    return node.size;
   }
 
   deleteMin (node = this.head) {
