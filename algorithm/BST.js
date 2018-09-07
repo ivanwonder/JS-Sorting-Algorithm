@@ -161,7 +161,7 @@ class BST {
    */
   size(node) {
     if (arguments.length === 0) {
-      return this.head.size;
+      return !this.head ? 0 : this.head.size;
     }
     if (!node) return 0;
     return node.size;

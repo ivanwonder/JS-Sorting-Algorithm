@@ -1,5 +1,5 @@
 var assert = require('assert');
-var {Graph, DepthFirstSearch, DepthFirstPaths, CC} = require('../algorithm/graph');
+var {Graph, DepthFirstSearch, DepthFirstPaths, CC, SymbolGraph} = require('../algorithm/graph');
 
 describe('graph', function () {
   const _graph = [
@@ -59,5 +59,48 @@ describe('graph', function () {
     assert.deepEqual(componentString, ["0 1 2 3 4 5 6", "7 8", "9 10 11 12"]);
     assert.equal(cc.connected(7, 8), true, "the two components should be equal");
     assert.equal(cc.count(), 3, "the graph should have 3 connected components");
+  })
+
+  it("test SymbolGraph", function () {
+    const symbolArray = [
+      ['JFK', 'MCO'],
+      ['ORD', 'DEN'],
+      ['ORD', 'HOU'],
+      ['DFW', 'PHX'],
+      ['JFK', 'ATL'],
+      ['ORD', 'DFW'],
+      ['ORD', 'PHX'],
+      ['ATL', 'HOU'],
+      ['DEN', 'PHX'],
+      ['PHX', 'LAX'],
+      ['JFK', 'ORD'],
+      ['DEN', 'LAS'],
+      ['DFW', 'HOU'],
+      ['ORD', 'ATL'],
+      ['LAS', 'LAX'],
+      ['ATL', 'MCO'],
+      ['HOU', 'MCO'],
+      ['LAS', 'PHX']
+    ]
+
+    const sg = new SymbolGraph(symbolArray);
+    const graph = sg.G();
+    let findKey = "JFK";
+    let stack = graph.adj(sg.index(findKey));
+
+    let actual = [];
+    while (stack.size()) {
+      actual.push(sg.name(stack.pop()));
+    }
+    assert.equal(actual.join(' '), "ORD ATL MCO");
+
+    findKey = "LAX";
+    stack = graph.adj(sg.index(findKey));
+
+    actual = [];
+    while (stack.size()) {
+      actual.push(sg.name(stack.pop()));
+    }
+    assert.equal(actual.join(' '), "LAS PHX");
   })
 })

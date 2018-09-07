@@ -160,20 +160,47 @@ class SymbolGraph {
    * @param {Array<[string, string]>} stream
    */
   constructor(stream) {
-    const bst = new BST();
+    this.bst = new BST();
+    this.keys = [];
+
     stream.forEach(item => {
       item.forEach(value => {
-        if (!bst.contains(value)) {
-          bst.put(value, bst.size());
+        if (!this.bst.contains(value)) {
+          this.keys[this.bst.size()] = value;
+          this.bst.put(value, this.bst.size());
         }
       });
     });
 
-    this.graph = new Graph(bst.size());
+    this.graph = new Graph(this.bst.size());
 
     stream.forEach(item => {
-      this.graph.addEdge(bst.get(item[0]), bst.get(item[1]));
+      this.graph.addEdge(this.bst.get(item[0]), this.bst.get(item[1]));
     });
+  }
+
+  contains(keys) {
+    return this.bst.contains(keys);
+  }
+
+  /**
+   * @param {string} keys
+   * @returns {number}
+   */
+  index(keys) {
+    return this.bst.get(keys);
+  }
+
+  /**
+   * @param {number} index
+   * @returns {string}
+   */
+  name(index) {
+    return this.keys[index];
+  }
+
+  G() {
+    return this.graph;
   }
 }
 
