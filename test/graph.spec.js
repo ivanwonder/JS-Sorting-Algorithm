@@ -1,5 +1,5 @@
 var assert = require('assert');
-var {Graph, DepthFirstSearch, DepthFirstPaths, CC, SymbolGraph} = require('../algorithm/graph');
+var {Graph, DepthFirstSearch, BreadthFirstPaths, DepthFirstPaths, CC, SymbolGraph} = require('../algorithm/graph');
 
 describe('graph', function () {
   const _graph = [
@@ -35,6 +35,25 @@ describe('graph', function () {
     }
 
     const expect = [0, 6, 4].join(flag);
+    assert.equal(path, expect);
+  })
+
+  it('test BreadthFirstPaths', function () {
+    const search = new BreadthFirstPaths(g, 0);
+    let path = '';
+
+    const flag = " --> "
+
+    if (search.hasPathTo(3)) {
+      const pathStack = search.pathTo(3);
+      const _path = [];
+      while (pathStack.size()) {
+        _path.push(pathStack.pop());
+      }
+      path = _path.join(flag);
+    }
+
+    const expect = [0, 5, 3].join(flag);
     assert.equal(path, expect);
   })
 

@@ -1,9 +1,12 @@
-import {Stack} from '../lib/stack';
+import {Stack, Queue} from '../lib/stack';
 import { isNumber, invariant } from '../lib/unit';
 import { BST } from './BST';
 
 class Graph {
   constructor(vertices) {
+    /**
+     * @type {Array<Stack>}
+     */
     this._adj = [];
     for (let i = 0; i < vertices; i++) {
       this._adj[i] = new Stack();
@@ -61,11 +64,67 @@ class DepthFirstSearch {
   }
 }
 
-class DepthFirstPaths {
-  constructor(graph, source) {
+class FindPath {
+  constructor (source) {
+    invariant(isNumber(source), "graph's vertex should be a number");
     this._marked = [];
-    this.edgeTo = [];
+    this._edgeTo = [];
     this.s = source;
+  }
+
+  hasPathTo(vertex) {
+    return !!this._marked[vertex];
+  }
+
+  pathTo(vertex) {
+    const path = new Stack();
+    path.push(vertex);
+    let pre = this._edgeTo[vertex];
+    while (pre !== this.s) {
+      path.push(pre);
+      pre = this._edgeTo[pre];
+    }
+    path.push(this.s);
+
+    return path;
+  }
+}
+
+class BreadthFirstPaths extends FindPath {
+  constructor(graph, vertex) {
+    super(vertex);
+    this.bfs(graph, vertex);
+  }
+
+  /**
+   * @param {Graph} graph
+   * @param {number} vertex
+   */
+  bfs(graph, vertex) {
+    invariant(isNumber(vertex), "graph's vertex should be a number");
+
+    const queue = new Queue();
+    queue.enqueue(vertex);
+    this._marked[vertex] = true;
+
+    while (queue.size()) {
+      const parentVertex = queue.dequeue();
+      const _adj = graph.adj(parentVertex);
+      while (_adj.size()) {
+        const childVertex = _adj.pop();
+        if (!this._marked[childVertex]) {
+          this._marked[childVertex] = true;
+          this._edgeTo[childVertex] = parentVertex;
+          queue.enqueue(childVertex);
+        }
+      }
+    }
+  }
+}
+
+class DepthFirstPaths extends FindPath {
+  constructor(graph, source) {
+    super(source);
     this.dfs(graph, source);
   }
 
@@ -78,27 +137,10 @@ class DepthFirstPaths {
       _ver = edge.pop();
       invariant(isNumber(_ver), "graph's vertex should be a number");
       if (!this._marked[_ver]) {
-        this.edgeTo[_ver] = vertex;
+        this._edgeTo[_ver] = vertex;
         this.dfs(graph, _ver);
       }
     }
-  }
-
-  hasPathTo(vertex) {
-    return !!this._marked[vertex];
-  }
-
-  pathTo(vertex) {
-    const path = new Stack();
-    path.push(vertex);
-    let pre = this.edgeTo[vertex];
-    while (pre !== this.s) {
-      path.push(pre);
-      pre = this.edgeTo[pre];
-    }
-    path.push(this.s);
-
-    return path;
   }
 }
 
@@ -204,4 +246,4 @@ class SymbolGraph {
   }
 }
 
-export {Graph, DepthFirstSearch, DepthFirstPaths, CC, SymbolGraph}
+export {Graph, DepthFirstSearch, BreadthFirstPaths, DepthFirstPaths, CC, SymbolGraph}
