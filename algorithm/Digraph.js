@@ -109,7 +109,78 @@ class DirectedDFS {
   }
 }
 
+class DirectedCycle {
+  /**
+   * @description cycle-finding constructor
+   * @param {Digraph} digraph
+   */
+  constructor(digraph) {
+    this._marked = [];
+    this._edgeTo = [];
+    this._onStack = [];
+    /**
+     * @type {Stack}
+     */
+    this._cycle = null;
+
+    for (let i = 0; i < digraph.V(); i++) {
+      if (!this._marked[i]) {
+        this.dfs(digraph, i);
+      }
+    }
+  }
+
+  /**
+   * @param {Digraph} digraph
+   * @param {number} vertex
+   */
+  dfs(digraph, vertex) {
+    this._marked[vertex] = true;
+    this._onStack[vertex] = true;
+
+    const _adj = digraph.adj(vertex);
+    for (const _vertex of _adj) {
+      if (this.hasCycle()) {
+        return;
+      } else if (!this._marked[_vertex]) {
+        this._edgeTo[_vertex] = vertex;
+        this.dfs(digraph, _vertex);
+      } else if (this._onStack[_vertex]) {
+        this._createCycle(vertex, _vertex);
+      } else {}
+    }
+
+    this._onStack[vertex] = false;
+  }
+
+  _createCycle(from, to) {
+    this._cycle = new Stack();
+    this._cycle.push(from);
+    let currentVertex = this._edgeTo[from];
+    while (currentVertex !== to) {
+      this._cycle.push(currentVertex);
+      currentVertex = this._edgeTo[currentVertex];
+    }
+    this._cycle.push(to);
+  }
+
+  /**
+   * @description does G have a directed cycle?
+   */
+  hasCycle() {
+    return !!this._cycle;
+  }
+
+  /**
+   * @description vertices on a cycle (if one exists)
+   */
+  cycle () {
+    return this._cycle;
+  }
+}
+
 export {
   Digraph,
-  DirectedDFS
+  DirectedDFS,
+  DirectedCycle
 }
