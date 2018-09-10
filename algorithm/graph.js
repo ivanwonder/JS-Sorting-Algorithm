@@ -34,6 +34,11 @@ class Graph {
 }
 
 class DepthFirstSearch {
+  /**
+   * @description find vertices connected to a source vertex
+   * @param {Graph} graph
+   * @param {number} vertex
+   */
   constructor(graph, vertex) {
     this._marked = [];
     this._count = 0;
@@ -45,20 +50,25 @@ class DepthFirstSearch {
     const _adj = graph.adj(vertex);
     this._marked[vertex] = true;
     this._count++;
-    let _vertex;
-    while (_adj.size()) {
-      _vertex = _adj.pop();
-      invariant(isNumber(_vertex), "graph's vertex should be a number");
+
+    for (const _vertex of _adj) {
       if (!this._marked[_vertex]) {
         this.dfs(graph, _vertex);
       }
     }
   }
 
+  /**
+   * @description is v connected to s?
+   * @param {number} vertex
+   */
   marked(vertex) {
     return !!this._marked[vertex];
   }
 
+  /**
+   * @description how many vertices are connected to s?
+   */
   count() {
     return this._count;
   }
@@ -110,8 +120,8 @@ class BreadthFirstPaths extends FindPath {
     while (queue.size()) {
       const parentVertex = queue.dequeue();
       const _adj = graph.adj(parentVertex);
-      while (_adj.size()) {
-        const childVertex = _adj.pop();
+
+      for (const childVertex of _adj) {
         if (!this._marked[childVertex]) {
           this._marked[childVertex] = true;
           this._edgeTo[childVertex] = parentVertex;
@@ -132,10 +142,8 @@ class DepthFirstPaths extends FindPath {
     invariant(isNumber(vertex), "graph's vertex should be a number");
     this._marked[vertex] = true;
     const edge = graph.adj(vertex);
-    let _ver;
-    while (edge.size()) {
-      _ver = edge.pop();
-      invariant(isNumber(_ver), "graph's vertex should be a number");
+
+    for (const _ver of edge) {
       if (!this._marked[_ver]) {
         this._edgeTo[_ver] = vertex;
         this.dfs(graph, _ver);
@@ -170,10 +178,8 @@ class CC {
     this._id[vertex] = this._count;
 
     const adj = graph.adj(vertex);
-    let _vertex;
-    while (adj.size()) {
-      _vertex = adj.pop();
-      invariant(isNumber(_vertex), "graph's vertex should be a number");
+
+    for (const _vertex of adj) {
       if (!this._marked[_vertex]) {
         this.dfs(graph, _vertex);
       }
