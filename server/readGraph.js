@@ -5,7 +5,7 @@ const fs = require("fs");
  * @param {string} line
  */
 function resolveLine(line) {
-  return line.split(" ").filter(item => item !== "");
+  return line.split(" ").filter(item => item !== "").map(value => Number(value));
 }
 
 function readGraph(resource) {

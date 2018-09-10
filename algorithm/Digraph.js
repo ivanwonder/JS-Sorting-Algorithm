@@ -1,8 +1,9 @@
-import { Stack } from "../lib/stack";
-import { invariant } from "../lib/unit";
+import { Stack, Queue } from "../lib/stack";
+import { invariant, isNull } from "../lib/unit";
 
 class Digraph {
   constructor(vertexCount) {
+    invariant(!!vertexCount, "please pass the number of digraph")
     /**
      * @type {Array<Stack>}
      */
@@ -51,7 +52,7 @@ class Digraph {
    * @description reverse of this digraph
    */
   reverse() {
-    const digraph = new Digraph();
+    const digraph = new Digraph(this.V());
 
     for (let i = 0; i < this.V(); i++) {
       const _adj = this.adj(i);
@@ -179,8 +180,121 @@ class DirectedCycle {
   }
 }
 
+class DepthFirstOrder {
+  /**
+   * @param {Digraph} digraph
+   */
+  constructor (digraph) {
+    /**
+     * Preorder : Put the vertex on a queue before the recursive calls.
+     * Postorder : Put the vertex on a queue after the recursive calls.
+     * Reverse postorder : Put the vertex on a stack after the recursive calls.
+     */
+    this._pre = new Queue();
+    this._post = new Queue();
+    this._reversePost = new Stack();
+
+    this._marked = [];
+
+    for (let i = 0; i < digraph.V(); i++) {
+      if (!this._marked[i]) {
+        this.dfs(digraph, i);
+      }
+    }
+  }
+
+  /**
+   * @param {Digraph} digraph
+   * @param {number} vertex
+   */
+  dfs(digraph, vertex) {
+    invariant(!isNull(vertex), "digraph's vertex cannot be null");
+    this._marked[vertex] = true;
+    this._pre.enqueue(vertex);
+    for (const _vertex of digraph.adj(vertex)) {
+      if (!this._marked[_vertex]) {
+        this.dfs(digraph, _vertex);
+      }
+    }
+    this._post.enqueue(vertex);
+    this._reversePost.push(vertex);
+  }
+
+  pre() {
+    return this._pre;
+  }
+
+  post() {
+    return this._post;
+  }
+
+  reversePost() {
+    return this._reversePost;
+  }
+}
+
+class KosarajuSharirSCC {
+  /**
+   * @param {Digraph} digraph
+   */
+  constructor(digraph) {
+    this._marked = [];
+    this._count = 0;
+    this._id = [];
+
+    const reverse = digraph.reverse();
+    const depthFirstOrder = new DepthFirstOrder(reverse);
+    for (const _vertex of depthFirstOrder.reversePost()) {
+      if (!this._marked[_vertex]) {
+        this.dfs(digraph, _vertex);
+        this._count++;
+      }
+    }
+  }
+
+  /**
+   * @param {Digraph} digraph
+   * @param {number} vertex
+   */
+  dfs(digraph, vertex) {
+    this._marked[vertex] = true;
+    this._id[vertex] = this._count;
+    for (const _vertex of digraph.adj(vertex)) {
+      if (!this._marked[_vertex]) {
+        this.dfs(digraph, _vertex);
+      }
+    }
+  }
+
+  /**
+   * @description are v and w strongly connected?
+   * @param {number} from
+   * @param {number} to
+   */
+  stronglyConnected(from, to) {
+    return this._id[from] === this._id[to];
+  }
+
+  /**
+   * @description number of strong components
+   */
+  count() {
+    return this._count;
+  }
+
+  /**
+   * @description component identifier for v ( between 0 and count()-1 )
+   * @param {number} vertex
+   */
+  id(vertex) {
+    return this._id[vertex];
+  }
+}
+
 export {
   Digraph,
   DirectedDFS,
-  DirectedCycle
+  DirectedCycle,
+  DepthFirstOrder,
+  KosarajuSharirSCC
 }
