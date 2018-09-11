@@ -1,5 +1,5 @@
 var assert = require('assert')
-var {Edge, EdgeWeightedGraph, LazyPrimMST} = require('../algorithm/MST')
+var {Edge, EdgeWeightedGraph, LazyPrimMST, PrimMST} = require('../algorithm/MST')
 var {readGraph} = require("../server/readGraph");
 var path = require("path");
 
@@ -19,17 +19,18 @@ describe('MST', function () {
   })
 
   it('test MST', function () {
-    const mst = new LazyPrimMST(tinyEWG);
-    const _res = [];
-
-    for (const _edge of mst.edges()) {
-      const v = _edge.either();
-      const w = _edge.other(v);
-      const weight = _edge.weight();
-      _res.push([v, w, weight])
+    function getResult(mst) {
+      const _res = [];
+      for (const _edge of mst.edges()) {
+        const v = _edge.either();
+        const w = _edge.other(v);
+        const weight = _edge.weight();
+        _res.push([v, w, weight])
+      }
+      return _res;
     }
 
-    assert.deepEqual(_res, [
+    const expectRes = [
       [0, 7, 0.16000],
       [1, 7, 0.19000],
       [0, 2, 0.26000],
@@ -37,8 +38,16 @@ describe('MST', function () {
       [5, 7, 0.28000],
       [4, 5, 0.35000],
       [6, 2, 0.40000]
-    ]);
+    ];
 
-    assert.equal(mst.weight(), 1.81);
+    const expectWeight = 1.81;
+
+    let mst = new LazyPrimMST(tinyEWG);
+    assert.deepEqual(getResult(mst), expectRes);
+    assert.equal(mst.weight(), expectWeight);
+
+    mst = new PrimMST(tinyEWG);
+    assert.deepEqual(getResult(mst), expectRes);
+    assert.equal(mst.weight(), expectWeight);
   })
 })

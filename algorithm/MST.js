@@ -1,6 +1,6 @@
 import { invariant } from "../lib/unit";
 import { Stack, Queue } from "../lib/stack";
-import { MinPQ } from "./PQ";
+import { MinPQ, IndexMinPQ } from "./PQ";
 
 class Edge {
   /**
@@ -173,7 +173,73 @@ class LazyPrimMST {
    */
   weight() {
     let _weight = 0;
-    for (const _edge of this._queue) {
+    for (const _edge of this.edges()) {
+      _weight += _edge.weight();
+    }
+    return _weight;
+  }
+}
+
+class PrimMST {
+  /**
+   * @param {EdgeWeightedGraph} edgeWeightedGraph
+   */
+  constructor(edgeWeightedGraph) {
+    this._edgeTo = [];
+    this._distTo = [];
+    this._marked = [];
+
+    for (let i = 0; i < edgeWeightedGraph.V(); i++) {
+      this._distTo[i] = Number.POSITIVE_INFINITY;
+    }
+
+    const pq = new IndexMinPQ();
+    this.visit(edgeWeightedGraph, 0, pq);
+
+    while (!pq.isEmpty()) {
+      const edge = pq.min();
+      this._edgeTo.push(edge);
+      this.visit(edgeWeightedGraph, pq.delMin(), pq);
+    }
+  }
+
+  /**
+   * @param {EdgeWeightedGraph} edgeWeightedGraph
+   * @param {number} vertex
+   * @param {IndexMinPQ} pq
+   */
+  visit(edgeWeightedGraph, vertex, pq) {
+    this._marked[vertex] = true;
+
+    for (const _edge of edgeWeightedGraph.adj(vertex)) {
+      const to = _edge.other(vertex);
+      if (this._marked[to]) {
+        continue;
+      }
+      if (this._distTo[to] > _edge.weight()) {
+        if (pq.contains(to)) {
+          pq.change(to, _edge);
+        } else {
+          pq.insert(to, _edge);
+        }
+        this._distTo[to] = _edge.weight();
+      }
+    }
+  }
+
+  /**
+   * @description all of the MST edges
+   */
+  edges() {
+    return this._edgeTo;
+  }
+
+  /**
+   * @description weight of MST
+   */
+  weight() {
+    let _weight = 0;
+    for (const _edge of this.edges()) {
       _weight += _edge.weight();
     }
     return _weight;
@@ -183,5 +249,6 @@ class LazyPrimMST {
 export {
   Edge,
   EdgeWeightedGraph,
-  LazyPrimMST
+  LazyPrimMST,
+  PrimMST
 }
