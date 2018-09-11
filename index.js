@@ -14,7 +14,8 @@ import radixSort from "./algorithm/radixSort";
 import { BST } from "./algorithm/BST";
 import { buildTreeCanvas } from "./lib/buildTreeCanvas";
 import { isRBTree } from "./lib/testBST";
-import { HashTable } from "./algorithm/hashTable";
+// import { HashTable } from "./algorithm/hashTable";
+import {RE} from "./algorithm/RE";
 
 setDefaultArray("1,45,23,76,34,98,567,12,34,22,21,45");
 
@@ -71,39 +72,45 @@ document.getElementById("delete-button").onclick = function() {
   }
 };
 
-function testHastTable() {
-  class OwnMap {
-    constructor() {
-      this._table = {};
-    }
+// function testHastTable() {
+//   class OwnMap {
+//     constructor() {
+//       this._table = {};
+//     }
 
-    set(key, value) {
-      this._table[key] = value;
-    }
+//     set(key, value) {
+//       this._table[key] = value;
+//     }
 
-    get(key) {
-      return this._table[key];
-    }
-  }
+//     get(key) {
+//       return this._table[key];
+//     }
+//   }
 
-  const _map = new HashTable();
-  const obj = new OwnMap();
-  const mapSize = 1000000;
-  for (let i = 1; i <= mapSize; i++) {
-    _map.set(`ivan${i}`, `name${i}`);
-    obj.set(`ivan${i}`, `name${i}`);
-  }
+//   const _map = new HashTable();
+//   const obj = new OwnMap();
+//   const mapSize = 1000000;
+//   for (let i = 1; i <= mapSize; i++) {
+//     _map.set(`ivan${i}`, `name${i}`);
+//     obj.set(`ivan${i}`, `name${i}`);
+//   }
 
-  const jsobj = 'jsobj';
-  const hashTable = 'hashTable';
+//   const jsobj = 'jsobj';
+//   const hashTable = 'hashTable';
 
-  console.time(hashTable);
-  _map.get('ivan1');
-  console.timeEnd(hashTable);
+//   console.time(hashTable);
+//   _map.get('ivan1');
+//   console.timeEnd(hashTable);
 
-  console.time(jsobj);
-  obj.get('ivan1');
-  console.timeEnd(jsobj);
+//   console.time(jsobj);
+//   obj.get('ivan1');
+//   console.timeEnd(jsobj);
+// }
+
+// testHastTable();
+
+document.querySelector("#reg-check").onclick = function() {
+  const reg = document.querySelector("#reg-exp").value;
+  const string = document.querySelector("#reg-string").value;
+  alert(new RE(reg).recognizes(string));
 }
-
-testHastTable();
