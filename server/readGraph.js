@@ -30,6 +30,25 @@ function readGraph(resource) {
   });
 }
 
+function readLine(resource) {
+  return new Promise((resolve, reject) => {
+    const graph = [];
+    const rl = readline.createInterface({
+      input: fs.createReadStream(resource),
+      crlfDelay: Infinity
+    });
+
+    rl.on("line", line => {
+      graph.push(line);
+    });
+
+    rl.on("close", () => {
+      resolve(graph);
+    });
+  });
+}
+
 module.exports = {
-  readGraph
+  readGraph,
+  readLine
 };
