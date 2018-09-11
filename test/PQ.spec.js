@@ -1,5 +1,5 @@
 var assert = require('assert')
-var {MinPQ, MaxPQ} = require('../algorithm/PQ');
+var {MinPQ, MaxPQ, IndexMinPQ} = require('../algorithm/PQ');
 
 describe('priority queue', function () {
   /**
@@ -103,5 +103,35 @@ describe('priority queue', function () {
     }
 
     assert.deepEqual(_res, [4, 3, 2, 1]);
+  })
+
+  it("test IndexMinPQ", function() {
+    let _res = [];
+    let _index = []
+    let indexMinPQ = new IndexMinPQ();
+    let index = 0;
+    indexMinPQ.insert(index++, testData.pop());
+    assert.equal(indexMinPQ.min(), 5);
+    assert.equal(indexMinPQ.delMin(), 0);
+    assert.equal(indexMinPQ.isEmpty(), true);
+    while (testData.length) {
+      indexMinPQ.insert(index++, testData.pop());
+      if (testData.length === 1) {
+        _index.push(indexMinPQ.min());
+        _res.push(indexMinPQ.delMin());
+      }
+    }
+
+    assert.equal(indexMinPQ.contains(3), false);
+    assert.equal(indexMinPQ.contains(2), true);
+    indexMinPQ.change(4, 5);
+    indexMinPQ.insert(3, 1);
+    while (!indexMinPQ.isEmpty()) {
+      _index.push(indexMinPQ.min());
+      _res.push(indexMinPQ.delMin());
+    }
+
+    assert.deepEqual(_index, [2, 1, 3, 4, 5]);
+    assert.deepEqual(_res, [3, 3, 2, 1, 4]);
   })
 })
