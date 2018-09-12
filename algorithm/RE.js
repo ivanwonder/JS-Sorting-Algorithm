@@ -41,6 +41,8 @@ class RE {
         left = pre;
       }
 
+      invariant(regArray[left] === "(", "no symbol ( corresponding to the )");
+
       if (regArray[index + 1] === "*") {
         _digraph.addEdge(left, index + 1);
         _digraph.addEdge(index + 1, left);

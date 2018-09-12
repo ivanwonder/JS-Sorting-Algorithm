@@ -159,6 +159,7 @@ class IndexMinPQ {
    * @param {*} item
    */
   change(key, item) {
+    invariant(this.contains(key), "the item associated with the key do not include in the PQ");
     this._key[key] = item;
     this.swim(this._keyToIndex[key]);
     this.sink(this._keyToIndex[key]);
@@ -177,6 +178,7 @@ class IndexMinPQ {
    * @param {number} key
    */
   delete(key) {
+    invariant(this.contains(key), "the item associated with the key do not include in the PQ");
     const index = this._keyToIndex[key];
     this.exch(index, this._size--);
     this.swim(index);
