@@ -5,7 +5,7 @@
   "main": "bubbleSort.js",
   "scripts": {
     "precommit": "npm test && npm run lint",
-    "lint": "eslint .",
+    "lint": "eslint ./lib ./algorithm ./server",
     "test": "mocha --require babel-register",
     "start": "webpack-dev-server --open --config webpack.dev.js --host 0.0.0.0",
     "build": "webpack --config webpack.prod.js"
