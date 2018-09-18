@@ -1,5 +1,5 @@
 import insertionSort from './insertionSort'
-import {isUndefined} from '../lib/unit'
+import { isUndefined } from '../lib/unit'
 
 function bucketSort (array = [], bucketSize) {
   const DEFAULT_BUCKET_SIZE = 5

@@ -1,4 +1,4 @@
-import {swap} from '../lib/unit'
+import { swap } from '../lib/unit'
 
 function buildMaxHead (array = []) {
   var length = array.length

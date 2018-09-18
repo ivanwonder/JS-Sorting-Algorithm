@@ -1,4 +1,4 @@
-import {isUndefined} from '../lib/unit'
+import { isUndefined } from '../lib/unit'
 
 function countingSort (array = [], maxValue) {
   var countArray = []

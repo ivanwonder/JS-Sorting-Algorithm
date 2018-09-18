@@ -1,4 +1,4 @@
-import {Stack, Queue} from '../lib/stack';
+import { Stack, Queue } from '../lib/stack';
 import { invariant, isNull } from '../lib/unit';
 
 class Node {

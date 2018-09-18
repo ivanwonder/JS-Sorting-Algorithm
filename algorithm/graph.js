@@ -1,4 +1,4 @@
-import {Stack, Queue} from '../lib/stack';
+import { Stack, Queue } from '../lib/stack';
 import { isNumber, invariant } from '../lib/unit';
 import { BST } from './BST';
 
@@ -252,4 +252,4 @@ class SymbolGraph {
   }
 }
 
-export {Graph, DepthFirstSearch, BreadthFirstPaths, DepthFirstPaths, CC, SymbolGraph}
+export { Graph, DepthFirstSearch, BreadthFirstPaths, DepthFirstPaths, CC, SymbolGraph }

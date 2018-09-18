@@ -1,4 +1,4 @@
-import {Digraph, DirectedDFS} from "./Digraph";
+import { Digraph, DirectedDFS } from "./Digraph";
 import { Stack } from "../lib/stack";
 import { invariant } from "../lib/unit";
 
