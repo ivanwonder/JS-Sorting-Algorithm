@@ -15,7 +15,8 @@ import { BST } from "./algorithm/BST";
 import { buildTreeCanvas } from "./lib/buildTreeCanvas";
 import { isRBTree } from "./lib/testBST";
 // import { HashTable } from "./algorithm/hashTable";
-import {RE} from "./algorithm/RE";
+import { RE } from "./algorithm/RE";
+import { CollisionSystem, Particle, Environment } from "./algorithm/Event-Driven-Simulation";
 
 setDefaultArray("1,45,23,76,34,98,567,12,34,22,21,45");
 
@@ -114,3 +115,31 @@ document.querySelector("#reg-check").onclick = function() {
   const string = document.querySelector("#reg-string").value;
   alert(new RE(reg).recognizes(string));
 }
+
+function eventDrivenSimulation() {
+  const canvas = document.querySelectorAll(".event-driven-simulation canvas");
+
+  const particles = [
+    new Particle(30, 90, 135, 0, 15, 300),
+    new Particle(150, 90, -135, 0, 5, 150),
+    new Particle(270, 95, -135, 0, 15, 300)
+  ];
+
+  const particlesOne = [
+    new Particle(123, 240, 0, 0, 10, 100),
+    new Particle(143, 240, 0, 0, 10, 100),
+    new Particle(163, 240, 0, 0, 10, 100),
+    new Particle(183, 240, 0, 0, 10, 100),
+    new Particle(132, 220, 0, 0, 10, 100),
+    new Particle(152, 220, 0, 0, 10, 100),
+    new Particle(172, 220, 0, 0, 10, 100),
+    new Particle(141, 202, 0, 0, 10, 100),
+    new Particle(161, 202, 0, 0, 10, 100),
+    new Particle(150, 182, 0, 0, 10, 100),
+    new Particle(120, 30, 0, 150, 10, 400)
+  ]
+  new CollisionSystem(particles, new Environment(300, 300, canvas[0])).simulate(new Date().getTime() + 5 * 60 * 1000, canvas);
+  new CollisionSystem(particlesOne, new Environment(300, 300, canvas[1])).simulate(new Date().getTime() + 5 * 60 * 1000, canvas);
+}
+
+eventDrivenSimulation();
