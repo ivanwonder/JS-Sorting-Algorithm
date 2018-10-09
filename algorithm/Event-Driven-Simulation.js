@@ -40,18 +40,18 @@ class Particle {
    * @param {number} ry
    * @param {number} vx
    * @param {number} vy
-   * @param {number} s
+   * @param {number} radius
    * @param {number} mass
    */
-  constructor(rx, ry, vx, vy, s, mass, color) {
+  constructor(rx, ry, vx, vy, radius, mass, color) {
     if (arguments.length) {
       this.rx = rx;
       this.ry = ry;
       this.vx = vx;
       this.vy = vy;
-      this.radius = s;
+      this.radius = radius;
       this.mass = mass;
-      this.color = color;
+      this.color = color || `rgb(${255 * Math.random()}, ${255 * Math.random()}, ${255 * Math.random()})`;
     } else {
     }
     this._count = 0;
@@ -63,9 +63,9 @@ class Particle {
    */
   draw(ctx) {
     ctx.beginPath();
-    ctx.strokeStyle = "black";
+    ctx.fillStyle = this.color;
     ctx.arc(this.rx, this.ry, this.radius, 0, Math.PI * 2, true);
-    ctx.stroke();
+    ctx.fill();
   }
 
   /**
