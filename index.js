@@ -137,7 +137,8 @@ function eventDrivenSimulation() {
     new Particle(161, 202, 0, 0, 10, 100),
     new Particle(150, 182, 0, 0, 10, 100),
     new Particle(120, 30, 0, 150, 10, 400)
-  ]
+  ];
+
   new CollisionSystem(particles, new Environment(300, 300, canvas[0])).simulate(new Date().getTime() + 5 * 60 * 1000, canvas);
   new CollisionSystem(particlesOne, new Environment(300, 300, canvas[1])).simulate(new Date().getTime() + 5 * 60 * 1000, canvas);
 }

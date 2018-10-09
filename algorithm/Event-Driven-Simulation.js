@@ -1,4 +1,4 @@
-import { isNull, invariant } from "../lib/unit";
+import { isNull } from "../lib/unit";
 import { MinPQ } from "./PQ";
 
 class Environment {
@@ -90,6 +90,17 @@ class Particle {
    */
   timeToHit(particle) {
     if (this === particle) return Number.POSITIVE_INFINITY;
+    // if (this.vx === 0 && particle.vx === 0) {
+    //   return Number.POSITIVE_INFINITY;
+    // }
+
+    // if (this.vy === 0 && particle.vy === 0) {
+    //   return Number.POSITIVE_INFINITY;
+    // }
+
+    // if (this.vx !== 0 && particle.vx !== 0 && this.vy !== 0 && particle.vy !== 0 && this.vx) {
+    //   return Number.POSITIVE_INFINITY;
+    // }
     const dx = particle.rx - this.rx;
     const dy = particle.ry - this.ry;
     const dvx = particle.vx - this.vx;
@@ -104,9 +115,24 @@ class Particle {
     // if (drdr < sigma*sigma) StdOut.println("overlapping particles");
     if (d < 0) return Number.POSITIVE_INFINITY;
     const time = -(dvdr + Math.sqrt(d)) / dvdv;
+
+    /**
+     * the Evnet of two particles which direction of movement is same and are close to each other will be added to the MinPQ continuously and the canvas will be the same.
+     */
     if (time === 0) {
-      return Number.POSITIVE_INFINITY;
+      // magnitude of normal force
+      const magnitude =
+        (2 * this.mass * particle.mass * dvdr) /
+        ((this.mass + particle.mass) * sigma);
+
+      // normal force, and in x and y directions
+      const fx = (magnitude * dx) / sigma;
+      const fy = (magnitude * dy) / sigma;
+      if (fx === 0 && fy === 0) {
+        return Number.POSITIVE_INFINITY;
+      }
     }
+
     return time;
   }
 
