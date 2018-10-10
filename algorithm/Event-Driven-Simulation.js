@@ -44,6 +44,10 @@ class Particle {
    * @param {number} mass
    */
   constructor(rx, ry, vx, vy, radius, mass, color) {
+    function getRandomColorValue () {
+      return Math.round(255 * Math.random());
+    }
+
     if (arguments.length) {
       this.rx = rx;
       this.ry = ry;
@@ -51,7 +55,7 @@ class Particle {
       this.vy = vy;
       this.radius = radius;
       this.mass = mass;
-      this.color = color || `rgb(${255 * Math.random()}, ${255 * Math.random()}, ${255 * Math.random()})`;
+      this.color = color || `rgb(${getRandomColorValue()}, ${getRandomColorValue()}, ${getRandomColorValue()})`;
     } else {
     }
     this._count = 0;
