@@ -15,8 +15,8 @@ class Environment {
 
     canvas.style.height = this.height + "px";
     canvas.style.width = this.width + "px";
-    canvas.width *= window.devicePixelRatio;
-    canvas.height *= window.devicePixelRatio;
+    canvas.width = this.width * window.devicePixelRatio;
+    canvas.height = this.height * window.devicePixelRatio;
     canvas
       .getContext("2d")
       .scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -44,7 +44,7 @@ class Particle {
    * @param {number} mass
    */
   constructor(rx, ry, vx, vy, radius, mass, color) {
-    function getRandomColorValue () {
+    function getRandomColorValue() {
       return Math.round(255 * Math.random());
     }
 
@@ -55,10 +55,22 @@ class Particle {
       this.vy = vy;
       this.radius = radius;
       this.mass = mass;
-      this.color = color || `rgb(${getRandomColorValue()}, ${getRandomColorValue()}, ${getRandomColorValue()})`;
+      this.color =
+        color ||
+        `rgb(${getRandomColorValue()}, ${getRandomColorValue()}, ${getRandomColorValue()})`;
     } else {
     }
     this._count = 0;
+  }
+
+  /**
+   * @param {Particle} particle
+   */
+  isOverlapped(particle) {
+    return (
+      Math.pow(this.rx - particle.rx, 2) + Math.pow(this.ry - particle.ry, 2) <=
+      Math.pow(this.radius + particle.radius, 2) + 0.01
+    );
   }
 
   /**
@@ -94,17 +106,7 @@ class Particle {
    */
   timeToHit(particle) {
     if (this === particle) return Number.POSITIVE_INFINITY;
-    // if (this.vx === 0 && particle.vx === 0) {
-    //   return Number.POSITIVE_INFINITY;
-    // }
 
-    // if (this.vy === 0 && particle.vy === 0) {
-    //   return Number.POSITIVE_INFINITY;
-    // }
-
-    // if (this.vx !== 0 && particle.vx !== 0 && this.vy !== 0 && particle.vy !== 0 && this.vx) {
-    //   return Number.POSITIVE_INFINITY;
-    // }
     const dx = particle.rx - this.rx;
     const dy = particle.ry - this.ry;
     const dvx = particle.vx - this.vx;
@@ -119,23 +121,6 @@ class Particle {
     // if (drdr < sigma*sigma) StdOut.println("overlapping particles");
     if (d < 0) return Number.POSITIVE_INFINITY;
     const time = -(dvdr + Math.sqrt(d)) / dvdv;
-
-    /**
-     * the Evnet of two particles which direction of movement is same and are close to each other will be added to the MinPQ continuously and the canvas will be the same.
-     */
-    if (time === 0) {
-      // magnitude of normal force
-      const magnitude =
-        (2 * this.mass * particle.mass * dvdr) /
-        ((this.mass + particle.mass) * sigma);
-
-      // normal force, and in x and y directions
-      const fx = (magnitude * dx) / sigma;
-      const fy = (magnitude * dy) / sigma;
-      if (fx === 0 && fy === 0) {
-        return Number.POSITIVE_INFINITY;
-      }
-    }
 
     return time;
   }
@@ -340,7 +325,11 @@ class CollisionSystem {
     let event = self.getNextValidEvent();
     if (isNull(event)) return;
 
+    let stopSimulate = false;
+
     function draw() {
+      if (stopSimulate) return;
+
       const currentTime = new Date().getTime();
       if (currentTime >= event.time) {
         self.predictCollisionsOneByOne(event, limit);
@@ -357,6 +346,12 @@ class CollisionSystem {
     }
 
     window.requestAnimationFrame(draw);
+
+    return {
+      stop: function() {
+        stopSimulate = true;
+      }
+    };
   }
 }
 
