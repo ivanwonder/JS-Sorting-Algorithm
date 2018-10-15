@@ -4,6 +4,10 @@ import {
   CollisionSystem,
   Environment
 } from "../../../algorithm/Event-Driven-Simulation";
+import TextField from "@material-ui/core/TextField";
+import { withStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import PropTypes from "prop-types";
 
 class Simulates {
   constructor() {
@@ -39,12 +43,20 @@ class Collisions extends Component {
   runExample(num) {
     if (typeof num !== "number") {
       const simu = new CollisionSystem(
-        this.buildRandomEDS(this.state.width, this.state.height, this.state.particleNum),
-        new Environment(this.state.width, this.state.height, this.canvas.current)
+        this.buildRandomEDS(
+          this.state.width,
+          this.state.height,
+          this.state.particleNum
+        ),
+        new Environment(
+          this.state.width,
+          this.state.height,
+          this.canvas.current
+        )
       ).simulate(new Date().getTime() + 5 * 60 * 1000);
 
       this.simulates.stop();
-      this.simulates.add(simu);
+      simu && this.simulates.add(simu);
     } else {
       this.example(num);
     }
@@ -93,7 +105,7 @@ class Collisions extends Component {
     ).simulate(new Date().getTime() + 5 * 60 * 1000);
 
     this.simulates.stop();
-    this.simulates.add(simulate);
+    simulate && this.simulates.add(simulate);
   }
 
   buildRandomEDS(width, height, num) {
@@ -125,11 +137,27 @@ class Collisions extends Component {
     return randomParticles;
   }
 
+  componentWillUnmount() {
+    this.simulates.stop();
+  }
+
   render() {
+    const { classes } = this.props;
+    const buttonStyle = {
+      variant: "contained",
+      color: "primary",
+      className: classes.button
+    };
+    const textFieldStyle = {
+      fullWidth: true,
+      margin: "normal"
+    };
+
     return (
       <div>
-        <label>canvas width:</label>
-        <input
+        <TextField
+          label="canvas width:"
+          {...textFieldStyle}
           value={this.state.width}
           onChange={event =>
             this.setState({
@@ -137,8 +165,9 @@ class Collisions extends Component {
             })
           }
         />
-        <label>canvas height:</label>
-        <input
+        <TextField
+          label="canvas height:"
+          {...textFieldStyle}
           value={this.state.height}
           onChange={event =>
             this.setState({
@@ -146,8 +175,9 @@ class Collisions extends Component {
             })
           }
         />
-        <label>particle: </label>
-        <input
+        <TextField
+          label="particle count:"
+          {...textFieldStyle}
           value={this.state.particleNum}
           onChange={event =>
             this.setState({
@@ -155,10 +185,18 @@ class Collisions extends Component {
             })
           }
         />
-        <button onClick={this.runExample.bind(this, "")}>run</button>
-        <button onClick={this.runExample.bind(this, 0)}>example 1</button>
-        <button onClick={this.runExample.bind(this, 1)}>example 2</button>
-        <button onClick={this.runExample.bind(this, 2)}>example 3</button>
+        <Button onClick={this.runExample.bind(this, "")} {...buttonStyle}>
+          run
+        </Button>
+        <Button onClick={this.runExample.bind(this, 0)} {...buttonStyle}>
+          example 1
+        </Button>
+        <Button onClick={this.runExample.bind(this, 1)} {...buttonStyle}>
+          example 2
+        </Button>
+        <Button onClick={this.runExample.bind(this, 2)} {...buttonStyle}>
+          example 3
+        </Button>
         <br />
         <canvas
           width="0"
@@ -171,4 +209,17 @@ class Collisions extends Component {
   }
 }
 
-export { Collisions };
+const styles = theme => ({
+  button: {
+    margin: theme.spacing.unit
+  },
+  input: {
+    display: "none"
+  }
+});
+
+Collisions.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+export default withStyles(styles)(Collisions);

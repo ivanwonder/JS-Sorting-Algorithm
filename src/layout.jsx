@@ -16,6 +16,7 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { RouteLink } from "./route/buildRouteLink";
 import { withRouter } from "react-router";
+import { getName } from "./route/config";
 
 const drawerWidth = 240;
 
@@ -105,7 +106,9 @@ class PersistentDrawer extends React.Component {
     super();
     this.state = {
       open: false,
-      anchor: "left"
+      anchor: "left",
+      prePathname: "",
+      routeName: ""
     };
   }
 
@@ -123,10 +126,13 @@ class PersistentDrawer extends React.Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.location !== this.props.location) {
-      // navigated!
+  static getDerivedStateFromProps(props, state) {
+    if (props.location.pathname !== state.prePathname) {
+      state.prePathname = props.location.pathname;
+      state.routeName = getName(state.prePathname);
+      return state;
     }
+    return null;
   }
 
   render() {
@@ -186,7 +192,7 @@ class PersistentDrawer extends React.Component {
                 <MenuIcon />
               </IconButton>
               <Typography variant="h6" color="inherit" noWrap>
-                Persistent drawer
+                {this.state.routeName}
               </Typography>
             </Toolbar>
           </AppBar>
@@ -221,3 +227,5 @@ PersistentDrawer.propTypes = {
 export default withRouter(
   withStyles(styles, { withTheme: true })(PersistentDrawer)
 );
+
+window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;

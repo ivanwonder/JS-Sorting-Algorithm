@@ -1,4 +1,4 @@
-import { Collisions } from "../views/collisions/collisions";
+import Collisions from "../views/collisions/collisions";
 import React from "react";
 
 const routes = [
@@ -11,15 +11,20 @@ const routes = [
     path: "/test",
     name: "test",
     component: function test() {
-      return <li>1</li>;
+      return <li> 1 </li>;
     }
   }
 ];
 
+function getName(path) {
+  const _route = routes.find(item => item.path === path);
+  if (_route) {
+    return _route.name;
+  } else {
+    return "";
+  }
+}
+
 export default routes;
 
-// export {
-//   getName: function(path) {
-//     return routes.find(name)
-//   }
-// }
+export { getName };
