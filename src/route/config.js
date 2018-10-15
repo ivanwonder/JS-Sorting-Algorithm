@@ -25,6 +25,10 @@ function getName(path) {
   }
 }
 
+function getIndex(path) {
+  return routes.findIndex(item => item.path === path);
+}
+
 export default routes;
 
-export { getName };
+export { getName, getIndex };

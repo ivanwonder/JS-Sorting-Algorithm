@@ -14,7 +14,7 @@ import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { RouteLink } from "./route/buildRouteLink";
+import RouteLink from "./route/buildRouteLink";
 import { withRouter } from "react-router";
 import { getName } from "./route/config";
 
