@@ -10,6 +10,11 @@ const routes = [
     path: "/bst",
     name: "Balanced Search Trees",
     component: loadable(import("../views/BST/BST"))
+  },
+  {
+    path: "/re",
+    name: "Regular Expressions",
+    component: loadable(import("../views/RE/RE"))
   }
 ];
 
