@@ -141,6 +141,10 @@ class Collisions extends Component {
     this.simulates.stop();
   }
 
+  componentDidMount() {
+    this.runExample(1);
+  }
+
   render() {
     const { classes } = this.props;
     const buttonStyle = {
