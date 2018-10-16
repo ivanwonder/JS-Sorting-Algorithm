@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { withStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
+import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import List from "@material-ui/core/List";
@@ -19,20 +20,14 @@ import { withRouter } from "react-router";
 import { getName } from "./route/config";
 
 const drawerWidth = 240;
+const ios = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent);
 
 const styles = theme => ({
   root: {
-    flexGrow: 1
-  },
-  appFrame: {
-    zIndex: 1,
-    overflow: "hidden",
-    position: "relative",
-    display: "flex",
-    width: "100%"
+    display: "flex"
   },
   appBar: {
-    position: "flex",
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
@@ -63,6 +58,9 @@ const styles = theme => ({
     width: drawerWidth,
     height: "100vh"
   },
+  swipeableDrawer: {
+    width: drawerWidth
+  },
   drawerHeader: {
     display: "flex",
     alignItems: "center",
@@ -75,17 +73,16 @@ const styles = theme => ({
     overflow: "auto",
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
-    padding: theme.spacing.unit * 3,
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
     })
   },
-  "content-left": {
-    marginLeft: -drawerWidth
+  contentCommon: {
+    padding: theme.spacing.unit * 3
   },
-  "content-right": {
-    marginRight: -drawerWidth
+  "content-left": {
+    marginLeft: isMobile ? 0 : -drawerWidth
   },
   contentShift: {
     transition: theme.transitions.create("margin", {
@@ -95,9 +92,6 @@ const styles = theme => ({
   },
   "contentShift-left": {
     marginLeft: 0
-  },
-  "contentShift-right": {
-    marginRight: 0
   }
 });
 
@@ -139,15 +133,47 @@ class PersistentDrawer extends React.Component {
     const { classes, theme } = this.props;
     const { anchor, open } = this.state;
 
-    const drawer = (
-      <Drawer
-        variant="persistent"
-        anchor={anchor}
-        open={open}
-        classes={{
+    const OwnDrawer = isMobile ? SwipeableDrawer : Drawer;
+    const _props = isMobile
+      ? {
+        onClose: this.handleDrawerClose.bind(this),
+        onOpen: this.handleDrawerOpen.bind(this),
+        disableBackdropTransition: !ios,
+        disableDiscovery: ios
+      }
+      : {
+        variant: "persistent"
+      };
+
+    const drawerStyle = !isMobile
+      ? {
+        classes: {
           paper: classes.drawerPaper
-        }}
-      >
+        }
+      }
+      : {
+        classes: {
+          paper: classes.swipeableDrawer
+        }
+      };
+
+    const root = !isMobile ? {
+      className: classes.root
+    } : {}
+
+    const contentStyle = {
+      className: classNames(classes.contentCommon)
+    }
+
+    if (!isMobile) {
+      contentStyle.className = classNames(classes.content, classes[`content-${anchor}`], {
+        [classes.contentShift]: open,
+        [classes[`contentShift-${anchor}`]]: open
+      }, contentStyle.className)
+    }
+
+    const drawer = (
+      <OwnDrawer {..._props} {...drawerStyle} anchor={anchor} open={open}>
         <div className={classes.drawerHeader}>
           <IconButton onClick={this.handleDrawerClose.bind(this)}>
             {theme.direction === "rtl" ? (
@@ -161,7 +187,7 @@ class PersistentDrawer extends React.Component {
         <List>
           <RouteLink />
         </List>
-      </Drawer>
+      </OwnDrawer>
     );
 
     let before = null;
@@ -174,44 +200,35 @@ class PersistentDrawer extends React.Component {
     }
 
     return (
-      <div className={classes.root}>
-        <div className={classes.appFrame}>
-          <AppBar
-            className={classNames(classes.appBar, {
-              [classes.appBarShift]: open,
-              [classes[`appBarShift-${anchor}`]]: open
-            })}
-          >
-            <Toolbar disableGutters={!open}>
-              <IconButton
-                color="inherit"
-                aria-label="Open drawer"
-                onClick={this.handleDrawerOpen.bind(this)}
-                className={classNames(classes.menuButton, open && classes.hide)}
-              >
-                <MenuIcon />
-              </IconButton>
-              <Typography variant="h6" color="inherit" noWrap>
-                {this.state.routeName}
-              </Typography>
-            </Toolbar>
-          </AppBar>
-          {before}
-          <main
-            className={classNames(
-              classes.content,
-              classes[`content-${anchor}`],
-              {
-                [classes.contentShift]: open,
-                [classes[`contentShift-${anchor}`]]: open
-              }
-            )}
-          >
-            <div className={classes.drawerHeader} />
-            {this.props.children}
-          </main>
-          {after}
-        </div>
+      <div { ...root }>
+        <AppBar
+          className={classNames(classes.appBar, {
+            [classes.appBarShift]: open,
+            [classes[`appBarShift-${anchor}`]]: open
+          })}
+        >
+          <Toolbar disableGutters={!open}>
+            <IconButton
+              color="inherit"
+              aria-label="Open drawer"
+              onClick={this.handleDrawerOpen.bind(this)}
+              className={classNames(classes.menuButton, open && classes.hide)}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" color="inherit" noWrap>
+              {this.state.routeName}
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        {before}
+        <main
+          {...contentStyle}
+        >
+          <div className={classes.drawerHeader} />
+          {this.props.children}
+        </main>
+        {after}
       </div>
     );
   }
