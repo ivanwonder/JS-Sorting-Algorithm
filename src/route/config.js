@@ -1,11 +1,16 @@
-import Collisions from "../views/collisions/collisions";
 import React from "react";
+import { loadable } from "../util/asyncImport";
 
 const routes = [
   {
     path: "/collisions",
     name: "collisions",
-    component: Collisions
+    component: loadable(import("../views/collisions/collisions"))
+  },
+  {
+    path: "/bst",
+    name: "Balanced Search Trees",
+    component: loadable(import("../views/BST/BST"))
   },
   {
     path: "/test",
