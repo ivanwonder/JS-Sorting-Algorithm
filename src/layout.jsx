@@ -185,7 +185,7 @@ class PersistentDrawer extends React.Component {
         </div>
         <Divider />
         <List>
-          <RouteLink />
+          <RouteLink routeChange={this.handleDrawerClose.bind(this)}/>
         </List>
       </OwnDrawer>
     );

@@ -26,6 +26,7 @@ class RouteLink extends React.Component {
     const currentPath = config[index].path;
     if (this.props.location.pathname !== currentPath) {
       this.props.history.push(currentPath);
+      this.props.routeChange(index);
     }
   }
 
@@ -47,7 +48,8 @@ class RouteLink extends React.Component {
 
 RouteLink.propTypes = {
   history: PropTypes.object.isRequired,
-  location: PropTypes.object.isRequired
+  location: PropTypes.object.isRequired,
+  routeChange: PropTypes.func.isRequired
 };
 
 export default withRouter(RouteLink);
