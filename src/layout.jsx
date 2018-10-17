@@ -13,6 +13,7 @@ import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import GitIcon from "mdi-material-ui/githubCircle";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import RouteLink from "./route/buildRouteLink";
@@ -26,6 +27,9 @@ const isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgen
 const styles = theme => ({
   root: {
     display: "flex"
+  },
+  grow: {
+    flexGrow: 1
   },
   appBar: {
     transition: theme.transitions.create(["margin", "width"], {
@@ -118,6 +122,10 @@ class PersistentDrawer extends React.Component {
     this.setState({
       anchor: event.target.value
     });
+  }
+
+  openGithub() {
+    window.open("https://github.com/ivanwonder/JS-Sorting-Algorithm");
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -216,9 +224,17 @@ class PersistentDrawer extends React.Component {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" color="inherit" noWrap>
+            <Typography variant="h6" color="inherit" noWrap className={classes.grow}>
               {this.state.routeName}
             </Typography>
+            <IconButton
+              color="inherit"
+              aria-label="Go to github"
+              onClick={this.openGithub}
+              className={classNames(classes.menuButton, open && classes.hide)}
+            >
+              <GitIcon />
+            </IconButton>
           </Toolbar>
         </AppBar>
         {before}
