@@ -5,7 +5,16 @@ class BinaryIn {
   static inData = "";
   static buffer = 0;
   static bufferLength = 0;
-  static end = true;
+  static end = false;
+  // static init = false;
+
+  static initialize(inData = "") {
+    BinaryIn.buffer = 0;
+    BinaryIn.bufferLength = 0;
+    // BinaryIn.init = true;
+    BinaryIn.end = false;
+    BinaryIn.inData = inData;
+  }
 
   static readString(str) {
     BinaryIn.inData = str;
@@ -56,10 +65,41 @@ class BinaryIn {
 }
 
 class BinaryOut {
-  static buffer = "";
+  static outData = "";
+  static buffer = 0;
+  static bufferLength = 0;
+  static init = false;
+
+  static initialize(outData = "") {
+    BinaryOut.buffer = 0;
+    BinaryOut.bufferLength = 0;
+    BinaryOut.init = true;
+    BinaryOut.outData = outData;
+  }
+
+  static clearBuffer() {
+    if (!BinaryOut.init) {
+      BinaryOut.initialize();
+    }
+
+    if (BinaryOut.bufferLength) {
+      BinaryOut.outData += String.fromCharCode(BinaryOut.buffer << (16 - BinaryOut.bufferLength));
+    }
+    BinaryOut.buffer = 0;
+    BinaryOut.bufferLength = 0;
+  }
 
   static writeBit(bit) {
-    BinaryOut.buffer += bit ? "1" : "0";
+    if (!BinaryOut.init) {
+      BinaryOut.initialize();
+    }
+    BinaryOut.buffer <<= 1;
+    if (bit) BinaryOut.buffer |= 1;
+    BinaryOut.bufferLength++;
+
+    if (BinaryOut.bufferLength === 16) {
+      BinaryOut.clearBuffer();
+    }
   }
 
   static write(char, width) {
@@ -73,6 +113,19 @@ class BinaryOut {
       BinaryOut.writeBit(bit);
     }
   }
+
+  /**
+   * @param {string} str
+   */
+  static writeString(str, width = 8) {
+    for (let i = 0; i < str.length; i++) {
+      BinaryOut.write(str.charCodeAt(i), width);
+    }
+  }
+
+  static close() {
+    BinaryOut.clearBuffer();
+  }
 }
 
 class LZW {
@@ -84,6 +137,9 @@ class LZW {
    * @param {string} str
    */
   static compress(str) {
+    BinaryIn.initialize();
+    BinaryOut.initialize();
+
     const tst = new TST();
     for (let i = 0; i < LZW.charCount; i++) {
       tst.put(String.fromCharCode(i), i);
@@ -96,13 +152,51 @@ class LZW {
       BinaryOut.write(tst.get(longPrefix), LZW.codewordsWidth);
       const _len = longPrefix.length;
       begin++;
-      if (_len < _str.length && begin < LZW.charCount) {
+      if (_len < _str.length && begin < LZW.codewordsCount) {
         tst.put(_str.substring(0, _len + 1), begin);
       }
       _str = _str.substring(longPrefix.length);
     }
     BinaryOut.write(LZW.charCount, LZW.codewordsWidth);
-    console.log(BinaryOut.buffer);
+    BinaryOut.close();
+
+    return BinaryOut.outData;
+  }
+
+  /**
+   * @param {string} str
+   */
+  static expand(str) {
+    BinaryIn.initialize(str);
+    BinaryOut.initialize();
+
+    let codewords = BinaryIn.readInt(LZW.codewordsWidth);
+    const table = [];
+    let shift = 0;
+
+    for (; shift < LZW.charCount; shift++) {
+      table[shift] = String.fromCharCode(shift);
+    }
+
+    shift++;
+    let preChar = table[codewords];
+
+    while (true) {
+      BinaryOut.writeString(preChar);
+      codewords = BinaryIn.readInt(LZW.codewordsWidth);
+      if (codewords === LZW.charCount) break;
+      if (shift < LZW.codewordsCount) {
+        if (shift === codewords) {
+          table[shift++] = preChar + preChar.charAt(0);
+        } else {
+          table[shift++] = preChar + table[codewords].charAt(0);
+        }
+      }
+      preChar = table[codewords];
+    }
+
+    BinaryOut.close();
+    return BinaryOut.outData;
   }
 }
 
