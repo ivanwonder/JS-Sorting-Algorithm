@@ -19,20 +19,23 @@ class DataCompressionComponent extends React.Component {
     super();
     this.state = {
       compress: "",
+      compressResult: "",
       expand: "",
       expandResult: ""
     };
   }
 
   compress() {
+    const compress = LZW.compress(this.state.compress);
     this.setState({
-      expand: LZW.compress(this.state.compress)
+      expand: encodeURI(compress),
+      compressResult: compress
     });
   }
 
   expand() {
     this.setState({
-      expandResult: LZW.expand(this.state.expand)
+      expandResult: LZW.expand(decodeURI(this.state.expand))
     });
   }
 
@@ -49,7 +52,6 @@ class DataCompressionComponent extends React.Component {
             label="compress string:"
             margin="normal"
             multiline
-            variant="outlined"
             className={classes.textField}
             value={this.state.compress}
             onChange={event =>
@@ -76,14 +78,16 @@ class DataCompressionComponent extends React.Component {
               the compressed data:
             </Typography>
             <Typography variant="h5" component="h2">
-              {this.state.expand}
+              {this.state.compressResult}
             </Typography>
-            <Typography component="p">
+            <Typography color="textSecondary" gutterBottom>
               compression ratio:{" "}
               {this.state.compress
-                ? (this.state.expand.length / this.state.compress.length) * 100
+                ? (this.state.compressResult.length /
+                    this.state.compress.length) *
+                  100
                 : 0}
-              %
+              %;
             </Typography>
             <ExpansionPanel>
               <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -114,7 +118,6 @@ class DataCompressionComponent extends React.Component {
             label="expand string:"
             margin="normal"
             multiline
-            variant="outlined"
             className={classes.textField}
             value={this.state.expand}
             onChange={event =>
@@ -129,13 +132,18 @@ class DataCompressionComponent extends React.Component {
             </Button>
           </div>
         </div>
+        <Typography variant="caption" gutterBottom>
+          {
+            "the input data must be encode by the method 'encodeURI', some special character cannot be cut and paste."
+          }
+        </Typography>
         <Card>
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
               the data before expand:
             </Typography>
             <Typography variant="h5" component="h2">
-              {this.state.expand}
+              {decodeURI(this.state.expand)}
             </Typography>
             <Typography color="textSecondary" gutterBottom>
               the expanded data:

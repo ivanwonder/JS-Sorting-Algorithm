@@ -32,7 +32,8 @@ class BinaryDumpComponent extends React.Component {
     const { renderData } = this.props;
     BinaryIn.initialize(renderData);
     const strBite = this.props.renderData.length * 16;
-    const canvasHeight = Math.ceil(strBite / Math.floor(this.canvasWidth / width)) * height;
+    const canvasHeight =
+      Math.ceil(strBite / Math.floor(this.canvasWidth / width)) * height;
     this.canvas.current.width = this.canvasWidth;
     this.canvas.current.height = Math.max(canvasHeight, minCanvasHeight);
     const ctx = this.canvas.current.getContext("2d");
