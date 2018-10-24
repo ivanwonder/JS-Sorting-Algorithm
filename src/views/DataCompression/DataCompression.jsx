@@ -21,6 +21,7 @@ class DataCompressionComponent extends React.Component {
     super();
     this.state = {
       compress: "",
+      compressData: "",
       compressResult: "",
       expand: "",
       decodeExpand: "",
@@ -37,7 +38,8 @@ class DataCompressionComponent extends React.Component {
     const compress = LZW.compress(this.state.compress);
     this.setState({
       expand: encodeURI(compress),
-      compressResult: compress
+      compressResult: compress,
+      compressData: this.state.compress
     });
   }
 
@@ -110,7 +112,7 @@ class DataCompressionComponent extends React.Component {
               the data before compress:
             </Typography>
             <Typography variant="h5" component="h2">
-              {this.state.compress}
+              {this.state.compressData}
             </Typography>
             <Typography color="textSecondary" gutterBottom>
               the compressed data:
@@ -120,9 +122,9 @@ class DataCompressionComponent extends React.Component {
             </Typography>
             <Typography color="textSecondary" gutterBottom>
               compression ratio:{" "}
-              {this.state.compress
+              {this.state.compressData.length
                 ? (this.state.compressResult.length /
-                    this.state.compress.length) *
+                    this.state.compressData.length) *
                   100
                 : 0}
               %;
@@ -134,7 +136,7 @@ class DataCompressionComponent extends React.Component {
                 </Typography>
               </ExpansionPanelSummary>
               <ExpansionPanelDetails>
-                <BinaryDump renderData={this.state.compress} />
+                <BinaryDump renderData={this.state.compressData} />
               </ExpansionPanelDetails>
             </ExpansionPanel>
 
@@ -145,7 +147,7 @@ class DataCompressionComponent extends React.Component {
                 </Typography>
               </ExpansionPanelSummary>
               <ExpansionPanelDetails>
-                <BinaryDump renderData={this.state.expand} />
+                <BinaryDump renderData={this.state.compressResult} />
               </ExpansionPanelDetails>
             </ExpansionPanel>
           </CardContent>
