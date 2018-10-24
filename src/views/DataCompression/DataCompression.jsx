@@ -8,6 +8,11 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import PropType from "prop-types";
 import { LZW } from "../../../algorithm/DataCompression";
+import BinaryDump from "./BinaryDump";
+import ExpansionPanel from "@material-ui/core/ExpansionPanel";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 class DataCompressionComponent extends React.Component {
   constructor() {
@@ -73,6 +78,34 @@ class DataCompressionComponent extends React.Component {
             <Typography variant="h5" component="h2">
               {this.state.expand}
             </Typography>
+            <Typography component="p">
+              compression ratio:{" "}
+              {this.state.compress
+                ? (this.state.expand.length / this.state.compress.length) * 100
+                : 0}
+              %
+            </Typography>
+            <ExpansionPanel>
+              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography color="textSecondary" gutterBottom>
+                  the BinaryDump of data before compress:
+                </Typography>
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails>
+                <BinaryDump renderData={this.state.compress} />
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
+
+            <ExpansionPanel>
+              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography color="textSecondary" gutterBottom>
+                  the BinaryDump of compressed data:
+                </Typography>
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails>
+                <BinaryDump renderData={this.state.expand} />
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
           </CardContent>
         </Card>
 
