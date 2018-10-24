@@ -171,6 +171,10 @@ class LZW {
     BinaryOut.initialize();
 
     let codewords = BinaryIn.readInt(LZW.codewordsWidth);
+    // return the empty string
+    if (codewords === LZW.charCount) {
+      return "";
+    }
     const table = [];
     let shift = 0;
 

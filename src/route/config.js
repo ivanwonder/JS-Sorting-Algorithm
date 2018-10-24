@@ -15,6 +15,11 @@ const routes = [
     path: "/re",
     name: "Regular Expressions",
     component: loadable(import("../views/RE/RE"))
+  },
+  {
+    path: "/data-compression",
+    name: "Data Compression",
+    component: loadable(import("../views/DataCompression/DataCompression"))
   }
 ];
 
