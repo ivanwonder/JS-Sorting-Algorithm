@@ -15,7 +15,7 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import MySnackbarContentWrapper from "../../component/snackBar";
 import Snackbar from "@material-ui/core/Snackbar";
-import { encodeCharacterLessNine, decodeCharacterLessNine } from "../../util/encode";
+import { encodeToHex, decodeFromHex } from "../../util/encode";
 
 class DataCompressionComponent extends React.Component {
   constructor() {
@@ -38,7 +38,7 @@ class DataCompressionComponent extends React.Component {
   compress() {
     const compress = LZW.compress(this.state.compress);
     this.setState({
-      expand: encodeCharacterLessNine(compress),
+      expand: encodeToHex(compress),
       compressResult: compress,
       compressData: this.state.compress
     });
@@ -49,7 +49,7 @@ class DataCompressionComponent extends React.Component {
     let expandResult;
 
     try {
-      decodeExpand = decodeCharacterLessNine(this.state.expand);
+      decodeExpand = decodeFromHex(this.state.expand);
     } catch (e) {
       return this.setState({
         open: true,
@@ -156,7 +156,7 @@ class DataCompressionComponent extends React.Component {
 
         <div className={classes.inputContainer}>
           <TextField
-            label="expand string:"
+            label="expand string:(hexadecimal code which only need last four bits)"
             margin="normal"
             multiline
             className={classes.textField}
@@ -173,11 +173,6 @@ class DataCompressionComponent extends React.Component {
             </Button>
           </div>
         </div>
-        <Typography variant="caption" gutterBottom>
-          {
-            "after click the compress button above, the input data show here have been encoded from the compress data, because the unicode less then 9 cannot be cut and paste(it's convenient for test). when click the expand button, the input data will be decode to correct compress data to be used to expand."
-          }
-        </Typography>
         <Card>
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
