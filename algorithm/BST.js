@@ -478,6 +478,162 @@ class BST {
   }
 }
 
+class NodeOne extends Node {
+  constructor(key, value, isRed) {
+    super(key, value, isRed);
+    /**
+     * @type {NodeOne|null}
+     */
+    this.parent = null;
+  }
+}
+
+class BSTONE {
+  constructor() {
+    /**
+     * @type {NodeOne|null}
+     */
+    this.head = null;
+  }
+
+  /**
+   * @param {NodeOne|null} node
+   */
+  sibling(node) {
+    const parent = node.parent;
+    if (!parent.left || parent.key !== node.key) {
+      return parent.left;
+    } else {
+      return parent.right;
+    }
+  }
+
+  /**
+   * @param {NodeOne|null} node
+   */
+  isRed(node) {
+    if (!node) {
+      return false;
+    } else {
+      return node.isRed;
+    }
+  }
+
+  /**
+   * @param {NodeOne} node
+   */
+  rotateRight(node) {
+    const parent = node.parent;
+    const right = node.right;
+    const color = node.isRed;
+
+    node.right = parent;
+    node.parent = parent.parent;
+
+    parent.parent = node;
+    parent.left = right;
+
+    node.isRed = parent.isRed;
+    parent.isRed = color;
+  }
+
+  /**
+   * @param {NodeOne} node
+   */
+  rotateLeft(node) {
+    const parent = node.parent;
+    const left = node.left;
+    const color = node.isRed;
+
+    node.left = parent;
+    node.parent = parent.parent;
+
+    parent.parent = node;
+    parent.right = left;
+
+    node.isRed = parent.isRed;
+    parent.isRed = color;
+  }
+
+  /**
+   * @param {NodeOne} node
+   */
+  flipColor(node) {
+    node.isRed = true;
+    node.left.isRed = false;
+    node.right.isRed = false;
+  }
+
+  /**
+   * @param {NodeOne} node
+   */
+  insertCase(node) {
+    const preNode = node.parent;
+    if (!preNode) {
+      node.isRed = false;
+      this.head = node;
+      return;
+    };
+
+    if (preNode.isRed) {
+      if (!this.isRed(this.sibling(preNode))) {
+        if (preNode.key > node.key) {
+          this.rotateRight(preNode);
+        } else {
+          this.rotateLeft(preNode);
+        }
+        const parent = preNode.parent;
+        if (isNull(parent)) {
+          this.head = preNode;
+        } else {
+          if (parent.key > preNode.key) {
+            parent.left = preNode;
+          } else {
+            parent.right = preNode;
+          }
+        }
+      } else {
+        this.flipColor(preNode.parent);
+        this.insertCase(preNode.parent);
+      }
+    }
+  }
+
+  /**
+   * @param {Number} value
+   */
+  insert(key, value) {
+    const newNode = new NodeOne(key, value, true);
+    if (!this.head) {
+      newNode.isRed = false;
+      return (this.head = newNode);
+    }
+
+    let currentNode = this.head;
+    let preNode = null;
+    while (currentNode) {
+      preNode = currentNode;
+      if (currentNode.key > key) {
+        currentNode = currentNode.left;
+      } else if (currentNode.key < key) {
+        currentNode = currentNode.right;
+      } else {
+        invariant(false, "the key exist in the tree!!");
+      }
+    }
+
+    newNode.parent = preNode;
+    if (preNode.key > key) {
+      preNode.left = newNode;
+    } else {
+      preNode.right = newNode;
+    }
+    this.insertCase(newNode);
+    return this.head;
+  }
+}
+
 export {
-  BST
+  BST,
+  BSTONE
 }
