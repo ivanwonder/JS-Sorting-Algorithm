@@ -524,6 +524,8 @@ class BSTONE {
    */
   rotateRight(node) {
     const parent = node.parent;
+    const grandpa = parent.parent;
+
     const right = node.right;
     const color = node.isRed;
 
@@ -533,8 +535,22 @@ class BSTONE {
     parent.parent = node;
     parent.left = right;
 
+    if (right) {
+      right.parent = parent;
+    }
+
     node.isRed = parent.isRed;
     parent.isRed = color;
+
+    if (parent === this.head) {
+      this.head = node;
+    } else {
+      if (grandpa.key > node.key) {
+        grandpa.left = node;
+      } else {
+        grandpa.right = node;
+      }
+    }
   }
 
   /**
@@ -542,6 +558,8 @@ class BSTONE {
    */
   rotateLeft(node) {
     const parent = node.parent;
+    const grandpa = parent.parent;
+
     const left = node.left;
     const color = node.isRed;
 
@@ -551,10 +569,22 @@ class BSTONE {
     parent.parent = node;
     parent.right = left;
 
-    left.parent = parent;
+    if (left) {
+      left.parent = parent;
+    }
 
     node.isRed = parent.isRed;
     parent.isRed = color;
+
+    if (parent === this.head) {
+      this.head = node;
+    } else {
+      if (grandpa.key > node.key) {
+        grandpa.left = node;
+      } else {
+        grandpa.right = node;
+      }
+    }
   }
 
   /**
@@ -584,16 +614,16 @@ class BSTONE {
         } else {
           this.rotateLeft(preNode);
         }
-        const parent = preNode.parent;
-        if (isNull(parent)) {
-          this.head = preNode;
-        } else {
-          if (parent.key > preNode.key) {
-            parent.left = preNode;
-          } else {
-            parent.right = preNode;
-          }
-        }
+        // const parent = preNode.parent;
+        // if (isNull(parent)) {
+        //   this.head = preNode;
+        // } else {
+        //   if (parent.key > preNode.key) {
+        //     parent.left = preNode;
+        //   } else {
+        //     parent.right = preNode;
+        //   }
+        // }
       } else {
         this.flipColor(preNode.parent);
         this.insertCase(preNode.parent);
@@ -620,7 +650,8 @@ class BSTONE {
       } else if (currentNode.key < key) {
         currentNode = currentNode.right;
       } else {
-        invariant(false, "the key exist in the tree!!");
+        // invariant(false, "the key exist in the tree!!");
+        return;
       }
     }
 
@@ -672,11 +703,17 @@ class BSTONE {
    */
   replaceNode(from, to) {
     const parent = to.parent;
+    from.left = to.left;
+    from.right = to.right;
+    if (to.left) {
+      to.left.parent = from;
+    }
+    if (to.right) {
+      to.right.parent = from;
+    }
     if (isNull(parent)) {
       this.head = from;
       this.head.parent = null;
-      from.left = to.left;
-      from.right = to.right;
     } else {
       from.parent = parent;
       if (parent.key > from.key) {
@@ -747,15 +784,9 @@ class BSTONE {
 
     if (left) {
       this.rotateLeft(otherChild);
-      const color = node.isRed;
-      node.isRed = node.parent.isRed;
-      node.parent.isRed = color;
       otherChild.right.isRed = false;
     } else {
       this.rotateRight(otherChild);
-      const color = node.isRed;
-      node.isRed = node.parent.isRed;
-      node.parent.isRed = color;
       otherChild.left.isRed = false;
     }
     if (isNull(otherChild.parent)) {
@@ -791,17 +822,24 @@ class BSTONE {
             this.deleteCase(parent, parent.key > node.key);
           }
         } else {
-          if (parent.key > node.key) {
-            parent.left = node.left;
+          if (isNull(parent)) {
+            this.head = node.left;
           } else {
-            parent.right = node.left;
+            if (parent.key > node.key) {
+              parent.left = node.left;
+            } else {
+              parent.right = node.left;
+            }
           }
+
+          node.left.isRed = node.isRed;
+          node.left.parent = parent;
         }
       }
     } else {
       const minNode = this.getMin(node.right);
+      const parent = minNode.parent;
       if (minNode.isRed) {
-        const parent = minNode.parent;
         if (parent.key > minNode.key) {
           parent.left = null;
         } else {
@@ -812,25 +850,41 @@ class BSTONE {
       } else {
         const isTwoNode = this.isMoreThanTwoNode(minNode);
         const right = minNode.right;
-        const parent = minNode.parent;
         if (parent.key > minNode.key) {
           parent.left = right;
         } else {
           parent.right = right;
         }
+        if (right) {
+          right.parent = parent;
+        }
         if (!isTwoNode) {
           this.replaceNode(minNode, node);
           minNode.isRed = node.isRed;
         } else {
-          const parent = minNode.parent;
           this.replaceNode(minNode, node);
           minNode.isRed = node.isRed;
-          this.deleteCase(parent, parent.key > minNode.key);
+          if (parent === node) {
+            this.deleteCase(minNode, false);
+          } else {
+            this.deleteCase(parent, parent.key > minNode.key);
+          }
         }
       }
     }
 
     return this.head;
+  }
+
+  getRandom (range = 10) {
+    return Math.floor(Math.random() * range)
+  }
+
+  buildRandomTree (runTimes = 10) {
+    while (runTimes--) {
+      const key = this.getRandom(runTimes * 10);
+      this.insert(key, key);
+    }
   }
 }
 
