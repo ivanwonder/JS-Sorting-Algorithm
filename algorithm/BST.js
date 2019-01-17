@@ -501,7 +501,7 @@ class BSTONE {
    */
   sibling(node) {
     const parent = node.parent;
-    if (!parent.left || parent.key !== node.key) {
+    if (!parent.left || parent.left.key !== node.key) {
       return parent.left;
     } else {
       return parent.right;
@@ -550,6 +550,8 @@ class BSTONE {
 
     parent.parent = node;
     parent.right = left;
+
+    left.parent = parent;
 
     node.isRed = parent.isRed;
     parent.isRed = color;
@@ -629,6 +631,205 @@ class BSTONE {
       preNode.right = newNode;
     }
     this.insertCase(newNode);
+    return this.head;
+  }
+
+  getNode(key) {
+    if (!this.head) {
+      return invariant(false, "tree do not exist!!");
+    }
+
+    let currentNode = this.head;
+    while (currentNode) {
+      if (currentNode.key === key) {
+        return currentNode;
+      } else if (currentNode.key > key) {
+        currentNode = currentNode.left;
+      } else {
+        currentNode = currentNode.right;
+      }
+    }
+
+    invariant(false, "tree do not exist!!");
+  }
+
+  /**
+   * @param {NodeOne} node
+   */
+  getMin(node) {
+    invariant(node, "node can not exist!!");
+
+    let currentNode = node;
+    while (currentNode.left) {
+      currentNode = currentNode.left;
+    }
+    return currentNode;
+  }
+
+  /**
+   * @param {NodeOne} from
+   * @param {NodeOne} to
+   */
+  replaceNode(from, to) {
+    const parent = to.parent;
+    if (isNull(parent)) {
+      this.head = from;
+      this.head.parent = null;
+      from.left = to.left;
+      from.right = to.right;
+    } else {
+      from.parent = parent;
+      if (parent.key > from.key) {
+        parent.left = from;
+      } else {
+        parent.right = from;
+      }
+    }
+  }
+
+  /**
+   * @param {NodeOne} node
+   * @param {boolean} left
+   */
+  otherChild(node, left) {
+    return left ? node.right : node.left;
+  }
+
+  /**
+   * @param {NodeOne} node
+   */
+  isMoreThanTwoNode(node) {
+    invariant(node, "node can not be null!!");
+    return !this.isRed(node.left) && !this.isRed(node.right);
+  }
+
+  /**
+   * @param {NodeOne} node
+   */
+  deleteCase(node, left) {
+    const otherChild = this.otherChild(node, left);
+    if (node.isRed && this.isMoreThanTwoNode(otherChild)) {
+      node.isRed = false;
+      otherChild.isRed = true;
+      return;
+    }
+
+    if (!node.isRed && this.isRed(otherChild)) {
+      left ? this.rotateLeft(otherChild) : this.rotateRight(otherChild);
+      node.isRed = true;
+      otherChild.isRed = false;
+      return this.deleteCase(node, left);
+    }
+
+    if (!node.isRed && !this.isRed(otherChild) && this.isMoreThanTwoNode(otherChild)) {
+      otherChild.isRed = true;
+      const parent = node.parent;
+      if (isNull(parent)) {
+        return;
+      } else {
+        return this.deleteCase(parent, parent.key > node.key);
+      }
+    }
+
+    if (left && this.isRed(otherChild.left)) {
+      this.rotateRight(otherChild.left);
+      const color = otherChild.isRed;
+      otherChild.isRed = otherChild.parent.isRed;
+      otherChild.parent.isRed = color;
+    }
+
+    if (!left && this.isRed(otherChild.right)) {
+      this.rotateLeft(otherChild);
+      const color = otherChild.isRed;
+      otherChild.isRed = otherChild.parent.isRed;
+      otherChild.parent.isRed = color;
+    }
+
+    if (left) {
+      this.rotateLeft(otherChild);
+      const color = node.isRed;
+      node.isRed = node.parent.isRed;
+      node.parent.isRed = color;
+      otherChild.right.isRed = false;
+    } else {
+      this.rotateRight(otherChild);
+      const color = node.isRed;
+      node.isRed = node.parent.isRed;
+      node.parent.isRed = color;
+      otherChild.left.isRed = false;
+    }
+    if (isNull(otherChild.parent)) {
+      this.head = otherChild;
+    }
+  }
+
+  /**
+   * @param {Number} key
+   */
+  delete(key) {
+    const node = this.getNode(key);
+    if (!node.right) {
+      const parent = node.parent;
+      if (node.isRed) {
+        if (parent.key > node.key) {
+          parent.left = null;
+        } else {
+          parent.right = null;
+        }
+      } else {
+        const isTwoNode = this.isMoreThanTwoNode(node);
+        if (isTwoNode) {
+          if (isNull(parent)) {
+            this.head = null;
+            return;
+          } else {
+            if (parent.key > node.key) {
+              parent.left = null;
+            } else {
+              parent.right = null;
+            }
+            this.deleteCase(parent, parent.key > node.key);
+          }
+        } else {
+          if (parent.key > node.key) {
+            parent.left = node.left;
+          } else {
+            parent.right = node.left;
+          }
+        }
+      }
+    } else {
+      const minNode = this.getMin(node.right);
+      if (minNode.isRed) {
+        const parent = minNode.parent;
+        if (parent.key > minNode.key) {
+          parent.left = null;
+        } else {
+          parent.right = null;
+        }
+        this.replaceNode(minNode, node);
+        minNode.isRed = node.isRed;
+      } else {
+        const isTwoNode = this.isMoreThanTwoNode(minNode);
+        const right = minNode.right;
+        const parent = minNode.parent;
+        if (parent.key > minNode.key) {
+          parent.left = right;
+        } else {
+          parent.right = right;
+        }
+        if (!isTwoNode) {
+          this.replaceNode(minNode, node);
+          minNode.isRed = node.isRed;
+        } else {
+          const parent = minNode.parent;
+          this.replaceNode(minNode, node);
+          minNode.isRed = node.isRed;
+          this.deleteCase(parent, parent.key > minNode.key);
+        }
+      }
+    }
+
     return this.head;
   }
 }
