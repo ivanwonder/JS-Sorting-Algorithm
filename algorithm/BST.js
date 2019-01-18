@@ -610,20 +610,20 @@ class BSTONE {
     if (preNode.isRed) {
       if (!this.isRed(this.sibling(preNode))) {
         if (preNode.key > node.key) {
-          this.rotateRight(preNode);
+          if (preNode.parent.right === preNode) {
+            this.rotateRight(node);
+            this.rotateLeft(node);
+          } else {
+            this.rotateRight(preNode);
+          }
         } else {
-          this.rotateLeft(preNode);
+          if (preNode.parent.right === preNode) {
+            this.rotateLeft(preNode);
+          } else {
+            this.rotateLeft(node);
+            this.rotateRight(node);
+          }
         }
-        // const parent = preNode.parent;
-        // if (isNull(parent)) {
-        //   this.head = preNode;
-        // } else {
-        //   if (parent.key > preNode.key) {
-        //     parent.left = preNode;
-        //   } else {
-        //     parent.right = preNode;
-        //   }
-        // }
       } else {
         this.flipColor(preNode.parent);
         this.insertCase(preNode.parent);
