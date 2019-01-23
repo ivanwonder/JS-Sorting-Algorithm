@@ -722,6 +722,8 @@ class BSTONE {
         parent.right = from;
       }
     }
+
+    from.isRed = to.isRed;
   }
 
   /**
@@ -735,9 +737,43 @@ class BSTONE {
   /**
    * @param {NodeOne} node
    */
-  isMoreThanTwoNode(node) {
+  isTwoNode(node) {
     invariant(node, "node can not be null!!");
     return !this.isRed(node.left) && !this.isRed(node.right);
+  }
+
+  /**
+   * @param {NodeOne} edge
+   */
+  deleteEdgeNode(edge) {
+    let child = null;
+
+    if (edge.left) {
+      child = edge.left;
+    }
+    if (edge.right) {
+      child = edge.right;
+    }
+
+    const parent = edge.parent;
+
+    if (parent.key > edge.key) {
+      parent.left = child;
+    } else {
+      parent.right = child;
+    }
+
+    if (child) {
+      child.parent = parent;
+      child.isRed = edge.isRed;
+    }
+  }
+
+  repaintHead() {
+    if (this.head) {
+      this.head.isRed = false;
+      this.head.parent = null;
+    }
   }
 
   /**
@@ -745,7 +781,7 @@ class BSTONE {
    */
   deleteCase(node, left) {
     const otherChild = this.otherChild(node, left);
-    if (node.isRed && this.isMoreThanTwoNode(otherChild)) {
+    if (node.isRed && this.isTwoNode(otherChild)) {
       node.isRed = false;
       otherChild.isRed = true;
       return;
@@ -758,7 +794,7 @@ class BSTONE {
       return this.deleteCase(node, left);
     }
 
-    if (!node.isRed && !this.isRed(otherChild) && this.isMoreThanTwoNode(otherChild)) {
+    if (!node.isRed && !this.isRed(otherChild) && this.isTwoNode(otherChild)) {
       otherChild.isRed = true;
       const parent = node.parent;
       if (isNull(parent)) {
@@ -768,29 +804,24 @@ class BSTONE {
       }
     }
 
+    let newNode = otherChild;
+
     if (left && this.isRed(otherChild.left)) {
       this.rotateRight(otherChild.left);
-      const color = otherChild.isRed;
-      otherChild.isRed = otherChild.parent.isRed;
-      otherChild.parent.isRed = color;
+      newNode = otherChild.parent;
     }
 
     if (!left && this.isRed(otherChild.right)) {
-      this.rotateLeft(otherChild);
-      const color = otherChild.isRed;
-      otherChild.isRed = otherChild.parent.isRed;
-      otherChild.parent.isRed = color;
+      this.rotateLeft(otherChild.right);
+      newNode = otherChild.parent;
     }
 
     if (left) {
-      this.rotateLeft(otherChild);
-      otherChild.right.isRed = false;
+      this.rotateLeft(newNode);
+      newNode.right.isRed = false;
     } else {
-      this.rotateRight(otherChild);
-      otherChild.left.isRed = false;
-    }
-    if (isNull(otherChild.parent)) {
-      this.head = otherChild;
+      this.rotateRight(newNode);
+      newNode.left.isRed = false;
     }
   }
 
@@ -802,68 +833,41 @@ class BSTONE {
     if (!node.right) {
       const parent = node.parent;
       if (node.isRed) {
-        if (parent.key > node.key) {
-          parent.left = null;
-        } else {
-          parent.right = null;
-        }
+        this.deleteEdgeNode(node);
       } else {
-        const isTwoNode = this.isMoreThanTwoNode(node);
+        const isTwoNode = this.isTwoNode(node);
         if (isTwoNode) {
           if (isNull(parent)) {
             this.head = null;
             return;
           } else {
-            if (parent.key > node.key) {
-              parent.left = null;
-            } else {
-              parent.right = null;
-            }
+            this.deleteEdgeNode(node);
             this.deleteCase(parent, parent.key > node.key);
           }
         } else {
           if (isNull(parent)) {
             this.head = node.left;
+            this.repaintHead();
           } else {
-            if (parent.key > node.key) {
-              parent.left = node.left;
-            } else {
-              parent.right = node.left;
-            }
+            this.deleteEdgeNode(node);
           }
-
-          node.left.isRed = node.isRed;
-          node.left.parent = parent;
         }
       }
     } else {
       const minNode = this.getMin(node.right);
       const parent = minNode.parent;
       if (minNode.isRed) {
-        if (parent.key > minNode.key) {
-          parent.left = null;
-        } else {
-          parent.right = null;
-        }
+        this.deleteEdgeNode(minNode);
         this.replaceNode(minNode, node);
-        minNode.isRed = node.isRed;
       } else {
-        const isTwoNode = this.isMoreThanTwoNode(minNode);
-        const right = minNode.right;
-        if (parent.key > minNode.key) {
-          parent.left = right;
-        } else {
-          parent.right = right;
-        }
-        if (right) {
-          right.parent = parent;
-        }
-        if (!isTwoNode) {
-          this.replaceNode(minNode, node);
-          minNode.isRed = node.isRed;
-        } else {
-          this.replaceNode(minNode, node);
-          minNode.isRed = node.isRed;
+        const isTwoNode = this.isTwoNode(minNode);
+        this.deleteEdgeNode(minNode);
+        this.replaceNode(minNode, node);
+        if (isTwoNode) {
+          // when the parent is replaced by minNode
+          //   B1
+          // B2   B3
+          // delete B1, the minNode is B3.
           if (parent === node) {
             this.deleteCase(minNode, false);
           } else {

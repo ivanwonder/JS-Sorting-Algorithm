@@ -95,7 +95,7 @@ const styles = theme => ({
   }
 });
 
-BST.propTypes = {
+BSTComponent.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
