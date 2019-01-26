@@ -1,4 +1,6 @@
 import { parseGrammar, TOKEN_TYPE } from "./lib/parseGrammar";
+import { cloneDeep } from "lodash";
+import { invariant } from "../../lib/unit";
 
 // const token = {
 //   terminal: {
@@ -23,6 +25,7 @@ class Partitions {
     this._terminal = terminal;
     this._input = input;
     this._table = [];
+    this.valid = false;
   }
 
   equal(other) {
@@ -52,17 +55,18 @@ class Partitions {
   }
 
   analyze(sentence, table, sentenceIndex, inputIndex) {
+    const _table = cloneDeep(table);
     const sentenceLength = sentence.right.length;
     const inputLength = this._input.length;
     if (sentenceIndex === sentenceLength - 1) {
-      const _table = table.concat(this._getSubInput(inputIndex));
-      this._addTable(sentence, _table);
+      const __table = _table.concat(this._getSubInput(inputIndex));
+      this._addTable(sentence, __table);
       return;
     }
 
     this.analyze(
       sentence,
-      table.concat({
+      _table.concat({
         isEmpty: true,
         value: ""
       }),
@@ -73,7 +77,7 @@ class Partitions {
     for (let i = inputIndex; i < inputLength; i++) {
       this.analyze(
         sentence,
-        table.concat(this._getSubInput(inputIndex, i + 1)),
+        _table.concat(this._getSubInput(inputIndex, i + 1)),
         sentenceIndex + 1,
         i + 1
       );
@@ -83,11 +87,15 @@ class Partitions {
   _addTable(sentence, table) {
     const _table = this._table.find(item => item.sentence === sentence);
     if (_table) {
-      _table.table.push(table);
+      _table.table.push({
+        data: table,
+        valid: false
+      });
     } else {
       this._table.push({
         sentence,
-        table: [table]
+        table: [{ data: table, valid: false }],
+        valid: false
       });
     }
   }
@@ -104,25 +112,49 @@ class Unger {
   parse(input) {
     // const start = this._grammar.start;
     this._token.start.forEach(item => {
-      console.log(this.beginPartitions(item, input));
+      console.log(this.beginPartitions(new Partitions(item, input)));
     });
     // console.log(this._partitions);
   }
 
-  beginPartitions(terminal, input) {
-    const partitions = new Partitions(terminal, input);
+  beginPartitions(partitions) {
+    const cachePartition = [];
+    // const partitions = new Partitions(terminal, input);
     const cutOff = this._partitions.find(item => item.equal(partitions));
     if (cutOff) {
       // TODO set cutoff valid false
-      return "hihi";
+      return null;
     }
     this._partitions.push(partitions);
     partitions.partition(this._grammar.grammar);
-    // console.log(partitions._table);
     partitions._table.forEach(item => {
       const sentence = item.sentence.right;
-      item.table.forEach(_item => {
-        const length = _item.length;
+      const length = sentence.length;
+
+      // filter the partition by comparing the terminal;
+      item.table = item.table.filter(_item => {
+        for (let i = 0; i < length; i++) {
+          if (sentence[i].type === TOKEN_TYPE.terminal) {
+            if (
+              _item.data[i].isEmpty ||
+              _item.data[i].value !== sentence[i].value
+            ) {
+              return false;
+            }
+          } else if (sentence[i].type === TOKEN_TYPE.nonterminal) {
+            if (
+              _item.data[i].value.length <
+              this._grammar.symbolMinLength[sentence[i].key]
+            ) {
+              return false;
+            }
+          }
+        }
+        return true;
+      });
+      item.table.forEach(_itemtable => {
+        const _item = _itemtable.data;
+        _itemtable.valid = true;
         for (let i = 0; i < length; i++) {
           if (sentence[i].type === TOKEN_TYPE.terminal) {
             if (_item[i].isEmpty) {
@@ -131,19 +163,41 @@ class Unger {
               _item[i].valid = _item[i].value === sentence[i].value;
             }
           } else {
-            // if the partitions have been partitioned. the next will be null;
-            _item[i].next = this.beginPartitions(
+            invariant(!_item[i].next, "wrong!!");
+            const _partitions = new Partitions(
               sentence[i].value,
               _item[i].value
             );
+            const cachedPartition = cachePartition.find(item =>
+              item.equal(_partitions)
+            );
+            if (cachedPartition) {
+              _item[i].next = cachedPartition;
+            } else {
+              // if the partitions have been partitioned. the next will be null;
+              _item[i].next = this.beginPartitions(_partitions);
+              if (_item[i].next) {
+                cachePartition.push(_item[i].next);
+              }
+            }
+            const _next = _item[i].next;
+            if (_next) {
+              _item[i].valid = _next.valid;
+            }
           }
+          if (!_item[i].valid) {
+            _itemtable.valid = false;
+            break;
+          }
+        }
+        if (_itemtable.valid) {
+          item.valid = true;
+          partitions.valid = true;
         }
       });
     });
 
-    if (terminal === "Expr" && input === "") {
-      console.log(partitions);
-    }
+    this._partitions.pop();
     return partitions;
   }
 }

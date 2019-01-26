@@ -47,6 +47,47 @@ class Sentence {
   }
 }
 
+function checkSymbolMinLength(grammar, symbolMinLength) {
+  let haveChange = false;
+
+  grammar.forEach(item => {
+    const right = item.right;
+    const length = right.length;
+
+    let minLength = 0;
+    let haveMinLength = true;
+
+    loop: for (let i = 0; i < length; i++) {
+      switch (right[i].type) {
+        case TOKEN_TYPE.terminal:
+          if (right[i] !== "") {
+            minLength += 1;
+          }
+          break;
+        case TOKEN_TYPE.nonterminal:
+          const _length = symbolMinLength[right[i].key];
+          if (typeof _length === "number") {
+            minLength += _length;
+          } else {
+            haveMinLength = false;
+            break loop;
+          }
+          break;
+      }
+    }
+
+    const preLength = symbolMinLength[item.left.key];
+    if (haveMinLength && (typeof preLength !== "number" || preLength > minLength)) {
+      haveChange = true;
+      symbolMinLength[item.left.key] = minLength;
+    }
+  });
+
+  if (haveChange) {
+    checkSymbolMinLength(grammar, symbolMinLength);
+  }
+}
+
 function parseGrammar(input, token) {
   let index = 0;
   const length = input.length;
@@ -101,8 +142,13 @@ function parseGrammar(input, token) {
       startGrammar.push(_item);
     }
   });
-  // console.log(grammar);
-  return { grammar, start: startGrammar };
+
+  const symbolMinLength = {};
+  checkSymbolMinLength(grammar, symbolMinLength);
+
+  // console.log(symbolMinLength);
+
+  return { grammar, start: startGrammar, symbolMinLength };
 }
 
 export { parseGrammar, TOKEN_TYPE };

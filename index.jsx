@@ -34,4 +34,4 @@ Factor -> ( Expr ) | i
   start: ["Expr"]
 });
 
-unger.parse("i*i");
+unger.parse("(i+i)*i*i*(i+i)*i*i*i*i*i*i*i*i*i*i*i");
