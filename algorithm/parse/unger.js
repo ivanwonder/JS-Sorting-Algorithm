@@ -1,5 +1,4 @@
 import { parseGrammar, TOKEN_TYPE } from "./lib/parseGrammar";
-import { cloneDeep } from "lodash";
 import { invariant } from "../../lib/unit";
 
 // const token = {
@@ -33,11 +32,13 @@ class Partitions {
   }
 
   partition(grammar) {
-    grammar.forEach(element => {
+    grammar.grammar.forEach(element => {
       if (element.left.value === this._terminal) {
         this.analyze(element, [], 0, 0);
       }
     });
+    this._table = this.copyTable();
+    this.filterTable(grammar.symbolMinLength);
   }
 
   _getSubInput(begin, end) {
@@ -55,7 +56,8 @@ class Partitions {
   }
 
   analyze(sentence, table, sentenceIndex, inputIndex) {
-    const _table = cloneDeep(table);
+    // the table element is json, when use concat to get new table, the element before the concat data is the same, it's a shallow copy. so make sure use the copyTable method.
+    const _table = table;
     const sentenceLength = sentence.right.length;
     const inputLength = this._input.length;
     if (sentenceIndex === sentenceLength - 1) {
@@ -99,35 +101,9 @@ class Partitions {
       });
     }
   }
-}
 
-class Unger {
-  constructor(input, token) {
-    this._input = input;
-    this._token = token;
-    this._grammar = parseGrammar(input, token);
-    this._partitions = [];
-  }
-
-  parse(input) {
-    // const start = this._grammar.start;
-    this._token.start.forEach(item => {
-      console.log(this.beginPartitions(new Partitions(item, input)));
-    });
-    // console.log(this._partitions);
-  }
-
-  beginPartitions(partitions) {
-    const cachePartition = [];
-    // const partitions = new Partitions(terminal, input);
-    const cutOff = this._partitions.find(item => item.equal(partitions));
-    if (cutOff) {
-      // TODO set cutoff valid false
-      return null;
-    }
-    this._partitions.push(partitions);
-    partitions.partition(this._grammar.grammar);
-    partitions._table.forEach(item => {
+  filterTable(symbolMinLength) {
+    this._table.forEach(item => {
       const sentence = item.sentence.right;
       const length = sentence.length;
 
@@ -142,20 +118,110 @@ class Unger {
               return false;
             }
           } else if (sentence[i].type === TOKEN_TYPE.nonterminal) {
-            if (
-              _item.data[i].value.length <
-              this._grammar.symbolMinLength[sentence[i].key]
-            ) {
+            if (_item.data[i].value.length < symbolMinLength[sentence[i].key]) {
               return false;
             }
           }
         }
         return true;
       });
+    });
+  }
+
+  copyTable() {
+    const copyFirst = item => {
+      return item.map(_item => copySecond(_item));
+    };
+
+    const copySecond = item => {
+      // the sentence will not be modified. no need to deep copy;
+      return {
+        sentence: item.sentence,
+        table: copyThird(item.table)
+      };
+    };
+
+    const copyThird = item => {
+      return item.map(_item => {
+        return {
+          data: copyFour(_item.data),
+          valid: _item.valid
+        };
+      });
+    };
+
+    const copyFour = item => {
+      return item.map(_item => {
+        return {
+          isEmpty: _item.isEmpty,
+          value: _item.value
+        };
+      });
+    };
+
+    return copyFirst(this._table);
+  }
+}
+
+class Unger {
+  constructor(input, token) {
+    this._input = input;
+    this._token = token;
+    this._grammar = parseGrammar(input, token);
+    this._partitions = [];
+
+    this.cacheAllPartitionTable = [];
+
+    this.__testSavedTime = 0;
+    this.__testTotalTime = 0;
+  }
+
+  parse(input) {
+    // const start = this._grammar.start;
+    const __testStart = new Date().getTime();
+
+    this._token.start.forEach(item => {
+      console.log(this.beginPartitions(new Partitions(item, input)));
+    });
+
+    this.__testTotalTime = new Date().getTime() - __testStart;
+    console.log(this.__testSavedTime);
+    console.log(this.__testTotalTime);
+    console.log(this.__testSavedTime / this.__testTotalTime);
+  }
+
+  beginPartitions(partitions) {
+    const cachePartition = [];
+
+    const cutOff = this._partitions.find(item => item.equal(partitions));
+    if (cutOff) {
+      return null;
+    }
+    this._partitions.push(partitions);
+
+    const __testStart = new Date().getTime();
+
+    const _cache = this.cacheAllPartitionTable.find(item =>
+      item.equal(partitions)
+    );
+
+    if (_cache) {
+      partitions._table = _cache.copyTable();
+      this.__testSavedTime += new Date().getTime() - __testStart;
+    } else {
+      partitions.partition(this._grammar);
+      this.cacheAllPartitionTable.push(partitions);
+    }
+
+    partitions._table.forEach(item => {
+      const sentence = item.sentence.right;
+      const length = sentence.length;
+
       item.table.forEach(_itemtable => {
         const _item = _itemtable.data;
         _itemtable.valid = true;
         for (let i = 0; i < length; i++) {
+          // TODO: the terminal alawys return true, because the false have been filter by partition;
           if (sentence[i].type === TOKEN_TYPE.terminal) {
             if (_item[i].isEmpty) {
               _item[i].valid = false;
