@@ -38,7 +38,7 @@ class Partitions {
       }
     });
     this._table = this.copyTable();
-    this.filterTable(grammar.symbolMinLength);
+    this.filterTable(grammar.symbolMinLength, grammar.prefix);
   }
 
   _getSubInput(begin, end) {
@@ -102,7 +102,7 @@ class Partitions {
     }
   }
 
-  filterTable(symbolMinLength) {
+  filterTable(symbolMinLength, prefix) {
     this._table.forEach(item => {
       const sentence = item.sentence.right;
       const length = sentence.length;
@@ -118,7 +118,15 @@ class Partitions {
               return false;
             }
           } else if (sentence[i].type === TOKEN_TYPE.nonterminal) {
-            if (_item.data[i].value.length < symbolMinLength[sentence[i].key]) {
+            const _value = _item.data[i].value;
+            const _map = prefix[sentence[i].key];
+            if (_value.length < symbolMinLength[sentence[i].key]) {
+              return false;
+            }
+            if (_value === "" && !_map.has("")) {
+              return false;
+            }
+            if (_value && !_map.has(_value[0])) {
               return false;
             }
           }

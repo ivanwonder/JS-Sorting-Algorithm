@@ -18,7 +18,7 @@ function wrapSymbol(token) {
     let key = "";
     let value = "";
     let type = "";
-    const isTerminal = !!token.terminal[sym];
+    const isTerminal = typeof token.terminal[sym] === "string";
     if (!isTerminal) {
       const isNonterminal =
         token.nonterminal.findIndex(item => item === sym) > -1;
@@ -77,7 +77,10 @@ function checkSymbolMinLength(grammar, symbolMinLength) {
     }
 
     const preLength = symbolMinLength[item.left.key];
-    if (haveMinLength && (typeof preLength !== "number" || preLength > minLength)) {
+    if (
+      haveMinLength &&
+      (typeof preLength !== "number" || preLength > minLength)
+    ) {
       haveChange = true;
       symbolMinLength[item.left.key] = minLength;
     }
@@ -85,6 +88,87 @@ function checkSymbolMinLength(grammar, symbolMinLength) {
 
   if (haveChange) {
     checkSymbolMinLength(grammar, symbolMinLength);
+  }
+}
+
+function addToMap(map, data) {
+  let haveChange = false;
+  if (typeof data === "string") {
+    haveChange = !map.has(data);
+    if (haveChange) {
+      map.add(data);
+    }
+  } else {
+    data.forEach(item => {
+      // the empty symbol will be processed independently;
+      if (item === "") {
+        return;
+      }
+      if (!map.has(item)) {
+        haveChange = true;
+        map.add(item);
+      }
+    });
+  }
+
+  return haveChange;
+}
+
+function firstNonterminal(grammar, prefix) {
+  let haveChange = false;
+  grammar.forEach(item => {
+    const left = item.left;
+    const right = item.right;
+    let _cache = prefix[left.value];
+    if (!_cache) {
+      _cache = new Set();
+      prefix[left.value] = _cache;
+    }
+    for (let i = 0; i < right.length; i++) {
+      if (right[i].type === TOKEN_TYPE.terminal) {
+        if (right[i].value === "") {
+          invariant(
+            i === right.length - 1 && i === 0,
+            "empty must in a single sentence!!!"
+          );
+          if (!_cache.has("")) {
+            _cache.add("");
+            haveChange = true;
+          }
+          break;
+        } else if (addToMap(_cache, right[i].value)) {
+          haveChange = true;
+        } else {
+        }
+        break;
+      }
+      if (right[i].type === TOKEN_TYPE.nonterminal) {
+        const _rightCache = prefix[right[i].value];
+        if (_rightCache) {
+          if (addToMap(_cache, _rightCache)) {
+            haveChange = true;
+          }
+          if (_rightCache.has("")) {
+            if (i === right.length - 1) {
+              if (!_cache.has("")) {
+                _cache.add("");
+                haveChange = true;
+              }
+            }
+            continue;
+          }
+          break;
+        } else {
+          break;
+        }
+      }
+
+      break;
+    }
+  });
+
+  if (haveChange) {
+    firstNonterminal(grammar, prefix);
   }
 }
 
@@ -146,9 +230,10 @@ function parseGrammar(input, token) {
   const symbolMinLength = {};
   checkSymbolMinLength(grammar, symbolMinLength);
 
-  // console.log(symbolMinLength);
+  const prefix = {};
+  firstNonterminal(grammar, prefix);
 
-  return { grammar, start: startGrammar, symbolMinLength };
+  return { grammar, start: startGrammar, symbolMinLength, prefix };
 }
 
 export { parseGrammar, TOKEN_TYPE };
