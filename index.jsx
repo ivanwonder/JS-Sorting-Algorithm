@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import { RouteConfig } from "./src/route/route.jsx";
 import Layout from "./src/layout";
 import { HashRouter as Router } from "react-router-dom";
-import { parseGrammar } from "./algorithm/parse/lib/parseGrammar";
 import { Unger } from "./algorithm/parse/unger.js";
 
 const App = () => {
@@ -18,20 +17,32 @@ const App = () => {
 
 ReactDOM.render(<App />, document.querySelector("#root"));
 
-const unger = new Unger(`
-Expr -> Expr + Term | Term
+const unger = new Unger(
+  `
+Expr -> Expr + Term | Term | Function
 Term -> Term * Factor | Factor
-Factor -> ( Expr ) | i
-`, {
-  terminal: {
-    "+": "+",
-    "*": "*",
-    "(": "(",
-    ")": ")",
-    "i": "i"
-  },
-  nonterminal: ["Expr", "Term", "Factor"],
-  start: ["Expr"]
-});
+Factor -> ( Expr ) | class
+Function -> Factor name ( Argu ) { }
+Argu -> Argu , argu | argu
+`,
+  {
+    terminal: {
+      "+": "+",
+      "*": "*",
+      "(": "(",
+      ")": ")",
+      "{": "{",
+      "}": "}",
+      class: "fun",
+      name: "name",
+      argu: "argu",
+      ",": ",",
+      "~": ""
+    },
+    nonterminal: ["Expr", "Term", "Factor", "Function", "Argu"],
+    start: ["Expr"],
+    separators: ["(", ")", "*", "+", "{", "}", ","]
+  }
+);
 
-unger.parse("(i+i)*i*i*(i+i)*i*i*i*i*i*i*i*i*i*i*i");
+unger.parse("fun name(argu, argu, argu){}");

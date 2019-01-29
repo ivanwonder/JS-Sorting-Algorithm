@@ -32,7 +32,7 @@ function wrapSymbol(token) {
       value = token.terminal[key];
     }
 
-    invariant(!!type, "can not find the type!!");
+    invariant(!!type, `can not find the type ${sym}!!`);
     return new TOKEN(key, value, type);
   };
 }
