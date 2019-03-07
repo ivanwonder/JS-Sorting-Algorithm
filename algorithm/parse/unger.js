@@ -1,5 +1,6 @@
 import { parseGrammar, TOKEN_TYPE } from "./lib/parseGrammar";
 import { invariant } from "../../lib/unit";
+import { Transform, Operator, TokenMap } from "./lib/token";
 
 const SPACE_SYMBOL = " ";
 
@@ -76,7 +77,7 @@ class Partitions {
 
   partition(grammar) {
     grammar.grammar.forEach(element => {
-      if (element.left.value === this._terminal) {
+      if (element.left.key === this._terminal) {
         this.analyze(element, [], 0, 0);
       }
     });
@@ -115,7 +116,10 @@ class Partitions {
   analyze(sentence, table, sentenceIndex, inputIndex) {
     // the table element is json, when use concat to get new table, the element before the concat data is the same, it's a shallow copy. so make sure use the copyTable method.
     const _table = table;
-    const sentenceLength = sentence.right.length;
+    let sentenceLength = sentence.right.length;
+    if (sentenceLength && (sentence.right[sentenceLength - 1] instanceof Transform)) {
+      sentenceLength--;
+    }
     const inputLength = this._input.length;
     if (sentenceIndex === sentenceLength - 1) {
       // const __table = _table.concat(this._getSubInput(inputIndex));
@@ -165,16 +169,20 @@ class Partitions {
   filterTable(symbolMinLength, prefix) {
     this._table.forEach(item => {
       const sentence = item.sentence.right;
-      const length = sentence.length;
+      let length = sentence.length;
+      if (length && (sentence[length - 1] instanceof Transform)) {
+        length--;
+      }
 
       // filter the partition by comparing the terminal;
       item.table = item.table.filter(_item => {
         for (let i = 0; i < length; i++) {
-          if (sentence[i].type === TOKEN_TYPE.terminal) {
+          if (sentence[i].type === TOKEN_TYPE.terminal || (sentence[i] instanceof Operator)) {
             if (
               this._getTableCell(_item, i).length === 0 ||
               this._getTableCell(_item, i).length > 1 ||
-              this._getTableCell(_item, i)[0].value !== sentence[i].value
+              // this._getTableCell(_item, i)[0].value !== sentence[i].value
+              !sentence[i].reg.test(this._getTableCell(_item, i)[0].value)
             ) {
               return false;
             }
@@ -187,7 +195,18 @@ class Partitions {
             if (_value.length === 0 && !_map.has("")) {
               return false;
             }
-            if (_value.length && !_map.has(_value[0].value)) {
+
+            const checkPrefix = (map, value) => {
+              let flag = false;
+              map.forEach(item => {
+                if (TokenMap.ins.get(item).reg.test(value)) {
+                  flag = true;
+                }
+              });
+
+              return flag;
+            }
+            if (_value.length && !checkPrefix(_map, _value[0].value)) {
               return false;
             }
           }
@@ -287,7 +306,10 @@ class Unger {
 
     partitions._table.forEach(item => {
       const sentence = item.sentence.right;
-      const length = sentence.length;
+      let length = sentence.length;
+      if (length && (sentence[length - 1] instanceof Transform)) {
+        length--;
+      }
 
       item.table.forEach(_itemtable => {
         const _item = _itemtable.data;
@@ -298,11 +320,12 @@ class Unger {
             if (_item[i].res.length === 0 || _item[i].res.length > 1) {
               _item[i].valid = false;
             } else {
-              _item[i].valid = _item[i].res[0].value === sentence[i].value;
+              // _item[i].valid = _item[i].res[0].value === sentence[i].value;
+              _item[i].valid = sentence[i].reg.test(_item[i].res[0].value);
             }
           } else {
             invariant(!_item[i].next, "wrong!!");
-            const _partitions = new Partitions(sentence[i].value, _item[i].res);
+            const _partitions = new Partitions(sentence[i].key, _item[i].res);
             const cachedPartition = cachePartition.find(item =>
               item.equal(_partitions)
             );

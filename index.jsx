@@ -19,27 +19,28 @@ ReactDOM.render(<App />, document.querySelector("#root"));
 
 const unger = new Unger(
   `
-Expr -> Expr + Term | Term | Function
-Term -> Term * Factor | Factor
-Factor -> ( Expr ) | class
-Function -> Factor name ( Argu ) { }
-Argu -> Argu , argu | argu
+Expr -> Expr + Term | Term | Function | e;
+Term -> Term * Factor | Factor;
+Factor -> ( Expr ) | class;
+Function -> Factor name ( Argu ) l r {qwe};
+Argu -> Argu , argu | argu;
+e -> name + name;
 `,
   {
     terminal: {
-      "+": "+",
-      "*": "*",
-      "(": "(",
-      ")": ")",
-      "{": "{",
-      "}": "}",
+      "+": "\\+",
+      "*": "\\*",
+      "(": "\\(",
+      ")": "\\)",
+      l: "\\{",
+      r: "\\}",
       class: "fun",
-      name: "name",
+      name: "[a-zA-Z]+",
       argu: "argu",
       ",": ",",
       "~": ""
     },
-    nonterminal: ["Expr", "Term", "Factor", "Function", "Argu"],
+    nonterminal: ["Expr", "Term", "Factor", "Function", "Argu", "e"],
     start: ["Expr"],
     separators: ["(", ")", "*", "+", "{", "}", ","]
   }
