@@ -19,12 +19,12 @@ ReactDOM.render(<App />, document.querySelector("#root"));
 
 const unger = new Unger(
   `
-Expr -> Expr + Term | Term | Function | e;
-Term -> Term * Factor | Factor;
-Factor -> ( Expr ) | class;
-Function -> Factor name ( Argu ) l r {qwe};
+Expr -> Program;
+Program -> Function;
+NewLine -> entry NewLine | ~;
+Factor ->  class;
+Function -> NewLine Factor name ( Argu ) l r NewLine {qwe} Function | ~;
 Argu -> Argu , argu | argu;
-e -> name + name;
 `,
   {
     terminal: {
@@ -38,12 +38,13 @@ e -> name + name;
       name: "[a-zA-Z]+",
       argu: "argu",
       ",": ",",
-      "~": ""
+      "entry": "\\n"
     },
-    nonterminal: ["Expr", "Term", "Factor", "Function", "Argu", "e"],
+    nonterminal: ["Expr", "Term", "Factor", "Program", "Argu", "NewLine", "Function"],
     start: ["Expr"],
-    separators: ["(", ")", "*", "+", "{", "}", ","]
+    separators: ["(", ")", "*", "+", "{", "}", ",", String.fromCodePoint(10)]
   }
 );
 
-unger.parse("fun name(argu, argu, argu){}");
+unger.parse(`fun name(argu, argu, argu){}
+`);

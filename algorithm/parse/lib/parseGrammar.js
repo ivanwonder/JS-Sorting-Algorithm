@@ -20,9 +20,7 @@ function checkSymbolMinLength(grammar, symbolMinLength) {
     loop: for (let i = 0; i < length; i++) {
       switch (right[i].type) {
         case TOKEN_TYPE.terminal:
-          if (right[i] !== "") {
-            minLength += 1;
-          }
+          minLength += 1;
           break;
         case TOKEN_TYPE.nonterminal:
           const _length = symbolMinLength[right[i].key];
@@ -86,17 +84,7 @@ function firstNonterminal(grammar, prefix) {
     }
     for (let i = 0; i < right.length; i++) {
       if (right[i].type === TOKEN_TYPE.terminal) {
-        if (right[i] instanceof Empty) {
-          invariant(
-            i === right.length - 1 && i === 0,
-            "empty must in a single sentence!!!"
-          );
-          if (!_cache.has("")) {
-            _cache.add("");
-            haveChange = true;
-          }
-          break;
-        } else if (addToMap(_cache, right[i].key)) {
+        if (addToMap(_cache, right[i].key)) {
           haveChange = true;
         } else {
         }
@@ -121,6 +109,18 @@ function firstNonterminal(grammar, prefix) {
         } else {
           break;
         }
+      }
+
+      if (right[i] instanceof Empty) {
+        invariant(
+          i === right.length - 1 && i === 0,
+          "empty must in a single sentence!!!"
+        );
+        if (!_cache.has("")) {
+          _cache.add("");
+          haveChange = true;
+        }
+        break;
       }
 
       break;

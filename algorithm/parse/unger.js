@@ -1,6 +1,6 @@
 import { parseGrammar, TOKEN_TYPE } from "./lib/parseGrammar";
 import { invariant } from "../../lib/unit";
-import { Transform, Operator, TokenMap } from "./lib/token";
+import { Transform, TokenMap, Empty } from "./lib/token";
 
 const SPACE_SYMBOL = " ";
 
@@ -117,7 +117,10 @@ class Partitions {
     // the table element is json, when use concat to get new table, the element before the concat data is the same, it's a shallow copy. so make sure use the copyTable method.
     const _table = table;
     let sentenceLength = sentence.right.length;
-    if (sentenceLength && (sentence.right[sentenceLength - 1] instanceof Transform)) {
+    if (
+      sentenceLength &&
+      sentence.right[sentenceLength - 1] instanceof Transform
+    ) {
       sentenceLength--;
     }
     const inputLength = this._input.length;
@@ -170,14 +173,14 @@ class Partitions {
     this._table.forEach(item => {
       const sentence = item.sentence.right;
       let length = sentence.length;
-      if (length && (sentence[length - 1] instanceof Transform)) {
+      if (length && sentence[length - 1] instanceof Transform) {
         length--;
       }
 
       // filter the partition by comparing the terminal;
       item.table = item.table.filter(_item => {
         for (let i = 0; i < length; i++) {
-          if (sentence[i].type === TOKEN_TYPE.terminal || (sentence[i] instanceof Operator)) {
+          if (sentence[i].type === TOKEN_TYPE.terminal) {
             if (
               this._getTableCell(_item, i).length === 0 ||
               this._getTableCell(_item, i).length > 1 ||
@@ -186,6 +189,8 @@ class Partitions {
             ) {
               return false;
             }
+          } else if (sentence[i] instanceof Empty) {
+            return this._getTableCell(_item, i).length === 0;
           } else if (sentence[i].type === TOKEN_TYPE.nonterminal) {
             const _value = this._getTableCell(_item, i);
             const _map = prefix[sentence[i].key];
@@ -199,13 +204,13 @@ class Partitions {
             const checkPrefix = (map, value) => {
               let flag = false;
               map.forEach(item => {
-                if (TokenMap.ins.get(item).reg.test(value)) {
+                if (item && TokenMap.ins.get(item).reg.test(value)) {
                   flag = true;
                 }
               });
 
               return flag;
-            }
+            };
             if (_value.length && !checkPrefix(_map, _value[0].value)) {
               return false;
             }
@@ -307,7 +312,7 @@ class Unger {
     partitions._table.forEach(item => {
       const sentence = item.sentence.right;
       let length = sentence.length;
-      if (length && (sentence[length - 1] instanceof Transform)) {
+      if (length && sentence[length - 1] instanceof Transform) {
         length--;
       }
 
@@ -316,14 +321,15 @@ class Unger {
         _itemtable.valid = true;
         for (let i = 0; i < length; i++) {
           // TODO: the terminal alawys return true, because the false have been filter by partition;
-          if (sentence[i].type === TOKEN_TYPE.terminal) {
-            if (_item[i].res.length === 0 || _item[i].res.length > 1) {
-              _item[i].valid = false;
-            } else {
-              // _item[i].valid = _item[i].res[0].value === sentence[i].value;
-              _item[i].valid = sentence[i].reg.test(_item[i].res[0].value);
-            }
-          } else {
+          // if (sentence[i].type === TOKEN_TYPE.terminal || (sentence)) {
+          //   if (_item[i].res.length === 0 || _item[i].res.length > 1) {
+          //     _item[i].valid = false;
+          //   } else {
+          //     // _item[i].valid = _item[i].res[0].value === sentence[i].value;
+          //     _item[i].valid = sentence[i].reg.test(_item[i].res[0].value);
+          //   }
+          // }
+          if (sentence[i].type === TOKEN_TYPE.nonterminal) {
             invariant(!_item[i].next, "wrong!!");
             const _partitions = new Partitions(sentence[i].key, _item[i].res);
             const cachedPartition = cachePartition.find(item =>
@@ -342,6 +348,9 @@ class Unger {
             if (_next) {
               _item[i].valid = _next.valid;
             }
+          } else {
+            // here alawys return true, because the false have been filter by partition;
+            _item[i].valid = true;
           }
           if (!_item[i].valid) {
             _itemtable.valid = false;
